@@ -1,0 +1,181 @@
+[13-Nov-2024 01:07:05 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function PHPMailer\PHPMailer\mail() in /home/ksuhhrnp/public_html/wp-includes/PHPMailer/PHPMailer.php:880
+Stack trace:
+#0 /home/ksuhhrnp/public_html/wp-includes/PHPMailer/PHPMailer.php(1968): PHPMailer\PHPMailer\PHPMailer->mailPassthru('yiminyidugad@gm...', '=?us-ascii?Q?[M...', 'Howdy! Your sit...', 'Date: Wed, 13 N...', NULL)
+#1 /home/ksuhhrnp/public_html/wp-includes/PHPMailer/PHPMailer.php(1691): PHPMailer\PHPMailer\PHPMailer->mailSend('Date: Wed, 13 N...', 'Howdy! Your sit...')
+#2 /home/ksuhhrnp/public_html/wp-includes/PHPMailer/PHPMailer.php(1523): PHPMailer\PHPMailer\PHPMailer->postSend()
+#3 /home/ksuhhrnp/public_html/wp-includes/pluggable.php(546): PHPMailer\PHPMailer\PHPMailer->send()
+#4 /home/ksuhhrnp/public_html/wp-admin/includes/class-wp-automatic-updater.php(1141): wp_mail(Array, '[My Blog] Your ...', 'Howdy! Your sit...', Array)
+#5 /home/ksuhhrnp/public_html/wp-admin/includes/class-wp-automatic-updater.php(804): WP_Automatic_Updater->send_email('success', Object(stdClass))
+#6 /home/ksuhhrnp/public_html/wp-admin/includes/class-wp-automatic-updater.php(771): WP_Automatic_Updater->after_core_update(Object(stdClass))
+#7 /home/ksuhhrnp/public_html/wp-includes/update.php(855): WP_Automatic_Updater->run()
+#8 /home/ksuhhrnp/public_html/wp-includes/class-wp-hook.php(324): wp_maybe_auto_update('')
+#9 /home/ksuhhrnp/public_html/wp-includes/class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#10 /home/ksuhhrnp/public_html/wp-includes/plugin.php(517): WP_Hook->do_action(Array)
+#11 /home/ksuhhrnp/public_html/wp-includes/update.php(293): do_action('wp_maybe_auto_u...')
+#12 /home/ksuhhrnp/public_html/wp-includes/class-wp-hook.php(324): wp_version_check()
+#13 /home/ksuhhrnp/public_html/wp-includes/class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#14 /home/ksuhhrnp/public_html/wp-includes/plugin.php(565): WP_Hook->do_action(Array)
+#15 /home/ksuhhrnp/public_html/wp-cron.php(191): do_action_ref_array('wp_version_chec...', Array)
+#16 {main}
+  thrown in /home/ksuhhrnp/public_html/wp-includes/PHPMailer/PHPMailer.php on line 880
+[13-Nov-2024 01:15:44 UTC] PHP Warning:  touch(): Unable to create file /home/ksuhhrnp/public_html/wp-content//fonts/1604aec457b8d4d3818470a96fc898f1.css because No such file or directory in /home/ksuhhrnp/public_html/wp-admin/includes/class-wp-filesystem-direct.php on line 529
+[13-Nov-2024 01:15:44 UTC] PHP Warning:  require(/home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/custom_css.php): Failed to open stream: No such file or directory in /home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/functions.php on line 101
+[13-Nov-2024 01:15:44 UTC] PHP Warning:  require(/home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/custom_css.php): Failed to open stream: No such file or directory in /home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/functions.php on line 101
+[13-Nov-2024 01:15:44 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/custom_css.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/functions.php:101
+Stack trace:
+#0 /home/ksuhhrnp/public_html/wp-includes/class-wp-hook.php(324): omega_travel_agents_register_styles('')
+#1 /home/ksuhhrnp/public_html/wp-includes/class-wp-hook.php(348): WP_Hook->apply_filters(NULL, Array)
+#2 /home/ksuhhrnp/public_html/wp-includes/plugin.php(517): WP_Hook->do_action(Array)
+#3 /home/ksuhhrnp/public_html/wp-includes/script-loader.php(2272): do_action('wp_enqueue_scri...')
+#4 /home/ksuhhrnp/public_html/wp-includes/class-wp-hook.php(324): wp_enqueue_scripts('')
+#5 /home/ksuhhrnp/public_html/wp-includes/class-wp-hook.php(348): WP_Hook->apply_filters(NULL, Array)
+#6 /home/ksuhhrnp/public_html/wp-includes/plugin.php(517): WP_Hook->do_action(Array)
+#7 /home/ksuhhrnp/public_html/wp-includes/general-template.php(3064): do_action('wp_head')
+#8 /home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/header.php(14): wp_head()
+#9 /home/ksuhhrnp/public_html/wp-includes/template.php(810): require_once('/home/ksuhhrnp/...')
+#10 /home/ksuhhrnp/public_html/wp-includes/template.php(745): load_template('/home/ksuhhrnp/...', true, Array)
+#11 /home/ksuhhrnp/public_html/wp-includes/general-template.php(48): locate_template(Array, true, true, Array)
+#12 /home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/index.php(8): get_header()
+#13 /home/ksuhhrnp/public_html/wp-includes/template-loader.php(106): include('/home/ksuhhrnp/...')
+#14 /home/ksuhhrnp/public_html/wp-blog-header.php(19): require_once('/home/ksuhhrnp/...')
+#15 /home/ksuhhrnp/public_html/index.php(17): require('/home/ksuhhrnp/...')
+#16 {main}
+  thrown in /home/ksuhhrnp/public_html/wp-content/themes/omega-travel-agents/functions.php on line 101
+[13-Nov-2024 01:16:03 UTC] PHP Warning:  Undefined array key "server_license" in /var/softaculous/sitepad/editor/site-inc/sitepad_functions2.php on line 779
+[13-Nov-2024 01:16:03 UTC] PHP Warning:  Trying to access array offset on value of type null in /var/softaculous/sitepad/editor/site-inc/sitepad_functions2.php on line 779
+[13-Nov-2024 01:16:11 UTC] PHP Warning:  Undefined array key "sitepad_setup_start" in /var/softaculous/sitepad/editor/site-data/plugins/sitepad/sitepad.php on line 317
+[13-Nov-2024 01:16:11 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:14 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:14 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:15 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:15 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:16 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:16 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:17 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:17 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:17 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:18 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:18 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:19 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:19 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:19 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:19 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:19 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:19 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:20 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:21 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:21 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:21 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:22 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:22 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:22 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:23 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:23 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:24 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:24 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:26 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:26 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:27 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:27 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:27 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:28 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:16:28 UTC] PHP Warning:  Undefined variable $parent_post_id in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 2820
+[13-Nov-2024 01:18:15 UTC] PHP Warning:  require_once(/var/softaculous/sitepad/editor//wp-admin/includes/plugin.php): Failed to open stream: No such file or directory in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/plugin-update-checker.php on line 363
+[13-Nov-2024 01:18:15 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/var/softaculous/sitepad/editor//wp-admin/includes/plugin.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/plugin-update-checker.php:363
+Stack trace:
+#0 /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/plugin-update-checker.php(326): PagelayerUpdateChecker_3_2->getPluginHeader()
+#1 /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/plugin-update-checker.php(375): PagelayerUpdateChecker_3_2->getInstalledVersion()
+#2 /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/plugin-update-checker.php(1357): PagelayerUpdateChecker_3_2->checkForUpdates()
+#3 /var/softaculous/sitepad/editor/site-inc/class-wp-hook.php(286): Pagelayer_PucScheduler_3_2->maybeCheckForUpdates()
+#4 /var/softaculous/sitepad/editor/site-inc/class-wp-hook.php(310): WP_Hook->apply_filters('', Array)
+#5 /var/softaculous/sitepad/editor/site-inc/plugin.php(531): WP_Hook->do_action(Array)
+#6 /var/softaculous/sitepad/editor/cron.php(133): do_action_ref_array('check_plugin_up...', Array)
+#7 /var/softaculous/sitepad/editor/site-inc/bootstrap.php(86): include_once('/var/softaculou...')
+#8 /home/ksuhhrnp/public_html/index.php(28): include_once('/var/softaculou...')
+#9 {main}
+  thrown in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/plugin-update-checker.php on line 363
+[13-Nov-2024 01:18:25 UTC] PHP Warning:  Undefined array key "goto_cp" in /var/softaculous/sitepad/editor/site-admin/index.php on line 97
+[13-Nov-2024 01:18:26 UTC] PHP Warning:  Undefined variable $current_theme_actions in /var/softaculous/sitepad/editor/site-admin/index.php on line 391
+[13-Nov-2024 01:18:26 UTC] PHP Fatal error:  Uncaught TypeError: implode(): Argument #1 ($array) must be of type array, string given in /var/softaculous/sitepad/editor/site-admin/index.php:391
+Stack trace:
+#0 /var/softaculous/sitepad/editor/site-admin/index.php(391): implode(' ', NULL)
+#1 /var/softaculous/sitepad/editor/site-inc/bootstrap.php(86): include_once('/var/softaculou...')
+#2 /home/ksuhhrnp/public_html/index.php(28): include_once('/var/softaculou...')
+#3 {main}
+  thrown in /var/softaculous/sitepad/editor/site-admin/index.php on line 391
+[13-Nov-2024 01:18:36 UTC] PHP Warning:  Undefined array key "goto_cp" in /var/softaculous/sitepad/editor/site-admin/index.php on line 97
+[13-Nov-2024 01:18:36 UTC] PHP Warning:  Undefined variable $current_theme_actions in /var/softaculous/sitepad/editor/site-admin/index.php on line 391
+[13-Nov-2024 01:18:36 UTC] PHP Fatal error:  Uncaught TypeError: implode(): Argument #1 ($array) must be of type array, string given in /var/softaculous/sitepad/editor/site-admin/index.php:391
+Stack trace:
+#0 /var/softaculous/sitepad/editor/site-admin/index.php(391): implode(' ', NULL)
+#1 /var/softaculous/sitepad/editor/site-inc/bootstrap.php(86): include_once('/var/softaculou...')
+#2 /home/ksuhhrnp/public_html/index.php(28): include_once('/var/softaculou...')
+#3 {main}
+  thrown in /var/softaculous/sitepad/editor/site-admin/index.php on line 391
+[13-Nov-2024 01:18:45 UTC] PHP Warning:  Undefined array key "goto_cp" in /var/softaculous/sitepad/editor/site-admin/index.php on line 97
+[13-Nov-2024 01:18:45 UTC] PHP Warning:  Undefined variable $current_theme_actions in /var/softaculous/sitepad/editor/site-admin/index.php on line 391
+[13-Nov-2024 01:18:45 UTC] PHP Fatal error:  Uncaught TypeError: implode(): Argument #1 ($array) must be of type array, string given in /var/softaculous/sitepad/editor/site-admin/index.php:391
+Stack trace:
+#0 /var/softaculous/sitepad/editor/site-admin/index.php(391): implode(' ', NULL)
+#1 /var/softaculous/sitepad/editor/site-inc/bootstrap.php(86): include_once('/var/softaculou...')
+#2 /home/ksuhhrnp/public_html/index.php(28): include_once('/var/softaculou...')
+#3 {main}
+  thrown in /var/softaculous/sitepad/editor/site-admin/index.php on line 391
+[13-Nov-2024 01:18:55 UTC] PHP Warning:  Attempt to read property "post_status" on null in /var/softaculous/sitepad/editor/site-admin/includes/template.php on line 767
+[13-Nov-2024 01:18:55 UTC] PHP Warning:  Attempt to read property "post_date" on null in /var/softaculous/sitepad/editor/site-admin/includes/template.php on line 779
+[13-Nov-2024 01:19:08 UTC] PHP Warning:  Attempt to read property "data" on bool in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:19:08 UTC] PHP Warning:  Attempt to read property "display_name" on null in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:19:17 UTC] PHP Fatal error:  Uncaught TypeError: closedir(): Argument #1 ($dir_handle) must be of type resource or null, bool given in /var/softaculous/sitepad/editor/site-admin/includes/file.php:168
+Stack trace:
+#0 /var/softaculous/sitepad/editor/site-admin/includes/file.php(168): closedir(false)
+#1 /var/softaculous/sitepad/editor/site-inc/functions.php(6803): list_files('/home/ksuhhrnp/...', 100, Array)
+#2 /var/softaculous/sitepad/editor/site-inc/class-wp-hook.php(286): wp_privacy_delete_old_export_files()
+#3 /var/softaculous/sitepad/editor/site-inc/class-wp-hook.php(310): WP_Hook->apply_filters('', Array)
+#4 /var/softaculous/sitepad/editor/site-inc/plugin.php(531): WP_Hook->do_action(Array)
+#5 /var/softaculous/sitepad/editor/cron.php(133): do_action_ref_array('wp_privacy_dele...', Array)
+#6 /var/softaculous/sitepad/editor/site-inc/bootstrap.php(86): include_once('/var/softaculou...')
+#7 /home/ksuhhrnp/public_html/index.php(28): include_once('/var/softaculou...')
+#8 {main}
+  thrown in /var/softaculous/sitepad/editor/site-admin/includes/file.php on line 168
+[13-Nov-2024 01:20:55 UTC] PHP Warning:  Attempt to read property "data" on bool in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:20:55 UTC] PHP Warning:  Attempt to read property "display_name" on null in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:50:26 UTC] PHP Warning:  Attempt to read property "data" on bool in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:50:26 UTC] PHP Warning:  Attempt to read property "display_name" on null in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:53:59 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:54:00 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:09 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:09 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:14 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:15 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:16 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:18 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:21 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:21 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:22 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:22 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:23 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:25 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:25 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:26 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:27 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:29 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:30 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:30 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:31 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:55:31 UTC] PHP Warning:  Trying to access array offset on value of type bool in /var/softaculous/sitepad/editor/site-inc/customize/class-wp-customize-nav-menu-item-setting.php on line 480
+[13-Nov-2024 01:56:01 UTC] PHP Warning:  Attempt to read property "data" on bool in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:56:01 UTC] PHP Warning:  Attempt to read property "display_name" on null in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:57:50 UTC] PHP Warning:  Attempt to read property "data" on bool in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 01:57:50 UTC] PHP Warning:  Attempt to read property "display_name" on null in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 02:03:44 UTC] PHP Warning:  Attempt to read property "post_status" on null in /var/softaculous/sitepad/editor/site-admin/includes/template.php on line 767
+[13-Nov-2024 02:03:44 UTC] PHP Warning:  Attempt to read property "post_date" on null in /var/softaculous/sitepad/editor/site-admin/includes/template.php on line 779
+[13-Nov-2024 02:03:58 UTC] PHP Warning:  Attempt to read property "data" on bool in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 02:03:58 UTC] PHP Warning:  Attempt to read property "display_name" on null in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 02:04:31 UTC] PHP Warning:  Attempt to read property "data" on bool in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 02:04:31 UTC] PHP Warning:  Attempt to read property "display_name" on null in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 02:08:23 UTC] PHP Warning:  Undefined array key "blockName" in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/premium_functions.php on line 967
+[13-Nov-2024 02:08:23 UTC] PHP Warning:  Undefined array key "blockName" in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/premium_functions.php on line 967
+[13-Nov-2024 02:08:41 UTC] PHP Warning:  Attempt to read property "data" on bool in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 02:08:41 UTC] PHP Warning:  Attempt to read property "display_name" on null in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer/main/functions.php on line 1930
+[13-Nov-2024 02:08:41 UTC] PHP Warning:  Undefined array key "blockName" in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/premium_functions.php on line 967
+[13-Nov-2024 02:08:41 UTC] PHP Warning:  Undefined array key "blockName" in /var/softaculous/sitepad/editor/site-data/plugins/pagelayer-pro/main/premium_functions.php on line 967

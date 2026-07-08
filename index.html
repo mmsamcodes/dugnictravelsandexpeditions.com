@@ -62,6 +62,32 @@
           </div>
         </section>
 
+        <section class="blog-section" id="blog-showcase">
+          <div class="section-heading">
+            <div class="eyebrow">Stories from the road</div>
+            <h2 class="section-title">A home for fresh trip updates and inspiration</h2>
+            <p class="section-intro">Step into a collection of inspiring travel stories, destination highlights, and unforgettable journeys designed to spark your next adventure.</p>
+          </div>
+          <div class="blog-shell">
+            <div id="blog-posts-grid" class="blog-grid" aria-live="polite"></div>
+            <aside class="blog-sidebar">
+              <div class="panel blog-panel">
+                <h3>For the team</h3>
+                <p>Log in to add photos, videos, tour highlights, and polished travel stories that appear seamlessly on the homepage.</p>
+                <button type="button" class="btn btn-primary blog-admin-toggle">Open admin dashboard</button>
+              </div>
+              <div class="panel blog-panel">
+                <h3>What can be shared</h3>
+                <ul>
+                  <li>Trip highlights and destination notes</li>
+                  <li>Photo galleries and short videos</li>
+                  <li>Tour launches, itineraries, and seasonal updates</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </section>
+
         <section>
           <h2 class="section-title">Our services</h2>
           <p class="section-intro">Beyond curated trips, we also support clients with end-to-end travel and event solutions designed for businesses and private travelers alike.</p>
@@ -116,5 +142,21 @@
       </footer>
     </div>
   </div>
+
+  <div class="modal-backdrop is-hidden" id="blog-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close story">×</button>
+      <div id="blog-modal-content"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop is-hidden" id="blog-admin-panel" aria-hidden="true">
+    <div class="modal-card modal-card--wide" role="dialog" aria-modal="true">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close admin dashboard">×</button>
+      <div id="blog-admin-content"></div>
+    </div>
+  </div>
+
+  <script src="js/blog.js"></script>
 </body>
 </html>

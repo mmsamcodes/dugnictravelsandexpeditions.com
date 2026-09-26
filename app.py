@@ -1,9 +1,10 @@
 import os
 import sqlite3
+import smtplib
 import uuid
-from datetime import datetime
+from email.message import EmailMessage
 from functools import wraps
-from flask import Flask, abort, jsonify, redirect, render_template, render_template_string, request, send_from_directory, session, url_for
+from flask import Flask, abort, jsonify, redirect, render_template_string, request, send_from_directory, session, url_for
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -12,15 +13,27 @@ app.config['DATABASE'] = os.path.join(os.path.dirname(__file__), 'blog.sqlite3')
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'mail.dugnictravelsandexpeditions.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', '465'))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'false').lower() in ('1', 'true', 'yes')
+app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'true').lower() in ('1', 'true', 'yes')
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'info@dugnictravelsandexpeditions.com')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'info@dugnictravelsandexpeditions.com')
+app.config['MAIL_RECIPIENT'] = 'info@dugnictravelsandexpeditions.com'
+
 
 def get_db():
+    if not os.path.exists(app.config['DATABASE']):
+        init_db()
+
     conn = sqlite3.connect(app.config['DATABASE'])
     conn.row_factory = sqlite3.Row
     return conn
 
 
 def init_db():
-    conn = get_db()
+    conn = sqlite3.connect(app.config['DATABASE'])
     conn.execute(
         '''
         CREATE TABLE IF NOT EXISTS posts (
@@ -41,7 +54,40 @@ def init_db():
     conn.close()
 
 
-init_db()
+def send_mail(subject, body, reply_to=None):
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = app.config['MAIL_DEFAULT_SENDER']
+    msg['To'] = app.config['MAIL_RECIPIENT']
+    if reply_to:
+        msg['Reply-To'] = reply_to
+    msg.set_content(body)
+
+    server_host = app.config['MAIL_SERVER']
+    server_port = app.config['MAIL_PORT']
+    use_ssl = app.config['MAIL_USE_SSL']
+    use_tls = app.config['MAIL_USE_TLS']
+    username = app.config['MAIL_USERNAME']
+    password = app.config['MAIL_PASSWORD']
+
+    if (use_ssl or use_tls) and not (username and password):
+        raise RuntimeError('SMTP authentication is required for secure mail delivery.')
+
+    if use_ssl:
+        server = smtplib.SMTP_SSL(server_host, server_port, timeout=30)
+    else:
+        server = smtplib.SMTP(server_host, server_port, timeout=30)
+        server.ehlo()
+        if use_tls:
+            server.starttls()
+            server.ehlo()
+
+    try:
+        if username and password:
+            server.login(username, password)
+        server.send_message(msg)
+    finally:
+        server.quit()
 
 
 def require_admin(view):
@@ -245,6 +291,13 @@ def js_static(filename):
     return send_from_directory(os.path.join(app.root_path, 'js'), filename)
 
 
+@app.route('/en')
+@app.route('/en/')
+@app.route('/en/index.html')
+def en_home():
+    return serve_static_page(os.path.join('en'))
+
+
 @app.route('/en/<path:path>')
 def serve_en_pages(path):
     normalized_path = os.path.normpath(path)
@@ -298,6 +351,69 @@ def tours():
 @app.route('/en/Contact/index.html')
 def contact():
     return serve_static_page(os.path.join('en', 'Contact'))
+
+
+@app.route('/contact/submit', methods=['POST'])
+@app.route('/en/Contact/submit', methods=['POST'])
+def contact_submit():
+    return_url = '/en/Contact/' if request.path.startswith('/en/') else '/contact'
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
+    destination = request.form.get('destination', '').strip()
+    travel_date = request.form.get('travel_date', '').strip()
+    message = request.form.get('message', '').strip()
+
+    if not name or not email:
+        return render_template_string('''
+            <!DOCTYPE html>
+            <html lang="en">
+            <head><meta charset="utf-8" /><title>Submission error</title></head>
+            <body>
+              <h1>Submission error</h1>
+              <p>Please provide your name and email address.</p>
+              <a href="''' + return_url + '''">Return to the contact form</a>
+            </body>
+            </html>
+        '''), 400
+
+    email_body = f"New inquiry submitted via Dugnic contact form:\n\n"
+    email_body += f"Name: {name}\n"
+    email_body += f"Email: {email}\n"
+    email_body += f"Destination: {destination or 'Not specified'}\n"
+    email_body += f"Preferred travel dates: {travel_date or 'Not specified'}\n\n"
+    email_body += f"Message:\n{message or 'No additional message provided.'}\n"
+
+    try:
+        send_mail(f"Dugnic inquiry from {name}", email_body, reply_to=email)
+    except Exception as exc:
+        return render_template_string('''
+            <!DOCTYPE html>
+            <html lang="en">
+            <head><meta charset="utf-8" /><title>Submission failed</title></head>
+            <body>
+              <h1>Submission failed</h1>
+              <p>We could not send your inquiry right now. Please try again later.</p>
+              <pre style="white-space: pre-wrap;">{{ error }}</pre>
+              <a href="''' + return_url + '''">Return to the contact form</a>
+            </body>
+            </html>
+        ''', error=str(exc)), 500
+
+    return render_template_string('''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <title>Inquiry sent</title>
+          <style>body { font-family: Arial, sans-serif; padding: 32px; background: #f8f3e7; color: #172126; } a { color: #0f5a3e; text-decoration: none; font-weight: 700; }</style>
+        </head>
+        <body>
+          <h1>Thank you!</h1>
+          <p>Your inquiry has been sent to info@dugnictravelsandexpeditions.com. We will follow up shortly.</p>
+          <p><a href="''' + return_url + '''">Back to contact</a></p>
+        </body>
+        </html>
+    ''')
 
 
 @app.route('/kenya')
@@ -586,11 +702,11 @@ def home():
                     <a class="btn btn-primary admin-link" href="/admin/login">Open admin dashboard</a>
                   </div>
                   <div class="panel blog-panel">
-                    <h3>What can be shared</h3>
+                    <h3>What clients can look forward to</h3>
                     <ul>
-                      <li>Trip highlights and destination notes</li>
-                      <li>Photo galleries and short videos</li>
-                      <li>Tour launches, itineraries, and seasonal updates</li>
+                      <li>insider travel tips and real destination stories</li>
+                      <li>fresh images and short video highlights from each trip</li>
+                      <li>new itineraries, seasonal offers, and inspiration for your next journey</li>
                     </ul>
                   </div>
                 </aside>

@@ -61,10 +61,10 @@
             </div>
           </div>
           <div class="card">
-            <form action="mailto:info@dugnictravelsandexpeditions.com" method="post" enctype="text/plain">
-              <input type="text" name="name" placeholder="Your name" required />
-              <input type="email" name="email" placeholder="Email address" required />
-              <select name="destination">
+            <form action="/contact/submit" method="post" autocomplete="on">
+              <input type="text" name="name" placeholder="Your name" autocomplete="name" required />
+              <input type="email" name="email" placeholder="Email address" autocomplete="email" required />
+              <select name="destination" autocomplete="country-name">
                 <option value="">Select destination</option>
                 <option>Kenya</option><option>Tanzania</option><option>Rwanda</option><option>Zanzibar</option><option>South Africa</option><option>France</option><option>Germany</option><option>Thailand</option><option>London</option>
               </select>

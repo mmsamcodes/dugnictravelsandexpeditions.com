@@ -65,6 +65,13 @@ class BlogAppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('text/css', response.content_type)
 
+    def test_js_asset_serves_correctly(self):
+        client = app.test_client()
+        response = client.get('/js/blog.js')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('application/javascript', response.content_type)
+
     def test_homepage_restores_conversion_sections(self):
         client = app.test_client()
         response = client.get('/')

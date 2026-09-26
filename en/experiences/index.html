@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Experiences · Dugnic Travels</title>
+  <meta name="description" content="Discover Dugnic's curated travel experiences grouped by interest: wellness, couples, adventure, food, family and more." />
+  <link rel="stylesheet" href="/css/dugnic-renovation.css" />
+  <style>
+    :root {
+      --forest: #0f5a3e;
+      --forest-deep: #083d2b;
+      --gold: #c7922b;
+      --gold-soft: #f4d68f;
+      --cream: #f8f3e7;
+      --ink: #172126;
+      --muted: #53606a;
+      --border: rgba(8, 61, 43, 0.12);
+      --shadow: 0 24px 70px rgba(8, 61, 43, 0.14);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --soft-green: rgba(15, 90, 62, 0.08);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(244, 214, 143, 0.32), transparent 24%),
+        linear-gradient(135deg, #f9f6f1 0%, #f4f0ea 100%);
+    }
+
+    .site-card {
+      border-radius: 30px;
+    }
+
+    .experiences-hero {
+      padding: 44px 28px 12px;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin: 0 auto 12px;
+      max-width: 760px;
+      color: var(--forest-deep);
+    }
+
+    .section-intro {
+      max-width: 820px;
+      margin: 0 auto 18px;
+      font-size: 1.03rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 18px;
+      padding: 20px 28px 28px;
+    }
+
+    .cat-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248, 243, 231, 0.94));
+      border: 1px solid rgba(8, 61, 43, 0.08);
+      border-radius: 20px;
+      padding: 20px 18px 18px;
+      box-shadow: 0 14px 32px rgba(8, 61, 43, 0.06);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      overflow: hidden;
+    }
+
+    .cat-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--forest), rgba(15, 90, 62, 0.3));
+    }
+
+    .cat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px rgba(8, 61, 43, 0.1);
+      border-color: rgba(15, 90, 62, 0.15);
+    }
+
+    .cat-card h3 {
+      margin: 0;
+      color: var(--forest-deep);
+      font-size: 1.55rem;
+      line-height: 1.2;
+      font-family: "Gilda Display", Georgia, serif;
+    }
+
+    .cat-card .small {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      min-height: 72px;
+    }
+
+    .cat-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .toggle {
+      background: transparent;
+      border: 1px solid rgba(15, 90, 62, 0.15);
+      color: var(--forest);
+      font-weight: 700;
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 999px;
+      transition: all 0.2s ease;
+    }
+
+    .toggle:hover {
+      background: var(--soft-green);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      line-height: 1;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), #d9a847);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(199, 146, 43, 0.22);
+    }
+
+    .cat-list {
+      list-style: none;
+      padding: 14px 14px 0;
+      margin: 0;
+      color: var(--muted);
+      display: none;
+      background: rgba(15, 90, 62, 0.02);
+      border: 1px solid rgba(15, 90, 62, 0.06);
+      border-radius: 12px;
+    }
+
+    .cat-list li {
+      position: relative;
+      padding: 7px 0 7px 16px;
+      line-height: 1.45;
+    }
+
+    .cat-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .cat-card.open .cat-list {
+      display: block;
+    }
+
+    .cat-card.open {
+      border-color: rgba(15, 90, 62, 0.18);
+      box-shadow: 0 18px 40px rgba(8, 61, 43, 0.12);
+    }
+
+    .intro {
+      max-width: 920px;
+      margin: 0 auto 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .cta-strip {
+      margin: 0 28px 8px;
+      padding: 18px 20px;
+      background: linear-gradient(135deg, rgba(15, 90, 62, 0.05), rgba(199, 146, 43, 0.06));
+      border: 1px solid rgba(15, 90, 62, 0.08);
+      border-radius: 18px;
+      color: var(--forest-deep);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+      .experiences-hero {
+        padding: 32px 18px 8px;
+      }
+      .categories {
+        padding: 14px 18px 20px;
+      }
+      .cat-actions {
+        align-items: stretch;
+      }
+      .toggle, .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <div class="site-card">
+      <header class="topbar">
+        <div class="brand">Dugnic Travels & Expeditions</div>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="/en/">Home</a>
+          <a href="/en/tours/">Tours</a>
+          <a href="/en/experiences/">Experiences</a>
+          <a href="/en/Contact/">Contact</a>
+        </nav>
+      </header>
+
+      <section class="experiences-hero">
+        <div class="eyebrow">Curated experiences</div>
+        <h1 class="section-title">Find experiences tailored to what you love</h1>
+        <p class="intro">We group our trips and activities by interest so you can quickly find the right style of travel — from restorative wellness and romantic escapes to action-packed adventures and family-friendly programmes.</p>
+      </section>
+
+      <main>
+        <section>
+          <h2 class="section-title">Explore by experience</h2>
+          <p class="section-intro">Find an experience that fits your interests — when you're ready, use the <strong>Enquire</strong> button on any card to send a tailored request and we'll follow up with options and pricing.</p>
+          <div class="cta-strip">Looking for something tailored? Start with the experience that matches your travel mood.</div>
+
+          <div class="categories" id="categories">
+            <div class="cat-card" data-key="wellness">
+              <h3>Wellness Travel</h3>
+              <p class="small">Travel and heal: yoga, forest therapy, burnout recovery and restorative weekends.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Nature Therapy walks</li>
+                <li>Stress detox weekends</li>
+                <li>Burnout recovery retreats</li>
+                <li>Forest therapy</li>
+                <li>Yoga and Safari</li>
+                <li>Mental health awareness retreats</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="couples">
+              <h3>Relationship & Couples</h3>
+              <p class="small">Romantic experiences for two: proposals, anniversaries, intimate escapes.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Couples Dinner Dates</li>
+                <li>Just Married Escapes</li>
+                <li>Anniversary Packages</li>
+                <li>Proposal Packages</li>
+                <li>Romantic Stay-cations</li>
+                <li>Reconnect Weekend</li>
+                <li>Empty Nest Couples Retreat</li>
+                <li>Love After 50 Trips</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="singles">
+              <h3>Singles & Social</h3>
+              <p class="small">Group travel and social experiences for single travellers and friend groups.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Singles Mingle</li>
+                <li>Girls trips</li>
+                <li>Meet & Travel</li>
+                <li>Single Professionals Brunch</li>
+                <li>Hiking for Singles</li>
+                <li>Travel to Find Friends</li>
+                <li>Solo but Social</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="women">
+              <h3>Women-focused</h3>
+              <p class="small">Wellness, bonding, and leadership retreats designed for women.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Women wellness retreats</li>
+                <li>Moms' Weekend Away</li>
+                <li>Queen's Escape</li>
+                <li>Women in Business Retreat</li>
+                <li>Self-Love Retreat</li>
+                <li>Adventure Sisters</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="men">
+              <h3>Men's experiences</h3>
+              <p class="small">Programmes for men's mental health, bonding, and active weekends.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Men's Mental Health Retreat</li>
+                <li>Gentlemen's Weekend</li>
+                <li>Fathers & Sons Camp</li>
+                <li>Brothers' Adventure</li>
+                <li>Men's BBQ & Camping</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="corporate">
+              <h3>Corporate & Leadership</h3>
+              <p class="small">Executive retreats, team building and wellbeing for organisations.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Executive Burnout Retreats</li>
+                <li>Team Building</li>
+                <li>Leadership Retreats</li>
+                <li>Employee Wellness Days</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="food">
+              <h3>Food & Drink</h3>
+              <p class="small">Culinary trails, coffee tours and dining-led experiences.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Nairobi Restaurant Hopping</li>
+                <li>Coffee Tours</li>
+                <li>Street Food Safari</li>
+                <li>Wine & Dine</li>
+                <li>Hidden Restaurants Tour</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="nightlife">
+              <h3>Nairobi Nightlife</h3>
+              <p class="small">Evening experiences: live music, rooftop bars and curated nights out.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Friday Nightlife Experience</li>
+                <li>Club Hopping</li>
+                <li>Rooftop Lounge Tour</li>
+                <li>Jazz Night</li>
+                <li>Afrobeat Fridays</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="nature">
+              <h3>Nature Lovers</h3>
+              <p class="small">Hikes, waterfalls, birding and photography-focused days and trips.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Sunrise Hiking</li>
+                <li>Sunset Picnics</li>
+                <li>Waterfalls Tour</li>
+                <li>Bird Watching</li>
+                <li>Photography Tours</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="adventure">
+              <h3>Adventure Tourism</h3>
+              <p class="small">Action-packed activities for thrill-seekers and active travellers.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Ziplining</li>
+                <li>White Water Rafting</li>
+                <li>ATV Riding</li>
+                <li>Hot Air Balloon</li>
+                <li>Rock Climbing</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="healing">
+              <h3>Healing Journeys</h3>
+              <p class="small">Emotionally-led retreats for grief, divorce recovery, and new beginnings.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Grief Retreat</li>
+                <li>Divorce Recovery Weekend</li>
+                <li>Self-Love Journey</li>
+                <li>Emotional Reset Weekend</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="faith">
+              <h3>Faith-based Tourism</h3>
+              <p class="small">Spiritual retreats, fellowship, and pilgrimage-style trips.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Church retreats</li>
+                <li>Prayer Mountain Trips</li>
+                <li>Christian Couples Weekend</li>
+                <li>Gospel Concert Tours</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="luxury">
+              <h3>Luxury Experiences</h3>
+              <p class="small">Premium stays, VIP safaris, helicopter transfers and bespoke luxury packages.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Luxury Staycations</li>
+                <li>Helicopter Experience</li>
+                <li>VIP Safari</li>
+                <li>Champagne Picnic</li>
+              </ul>
+            </div>
+
+            <div class="cat-card" data-key="family">
+              <h3>Family Experiences</h3>
+              <p class="small">Family-friendly days and holiday packages that keep every generation engaged.</p>
+              <button class="toggle" aria-expanded="false">Show offers</button>
+              <ul class="cat-list">
+                <li>Family Fun Days</li>
+                <li>Parent & Child Adventure</li>
+                <li>School Holiday Packages</li>
+                <li>Grandparents Weekend</li>
+              </ul>
+            </div>
+
+          </div>
+        </section>
+
+        <section style="padding:20px 20px 28px;">
+          <h2 class="section-title">Luxury, wellness, and adventure in one unforgettable journey</h2>
+          <p class="section-intro">We curate travel that feels elevated but deeply personal — where restorative escapes meet meaningful adventure, and every itinerary balances comfort, discovery, and connection. Whether you want to slow down, celebrate love, recharge your mind, or push your limits, there is a journey designed to feel both effortless and extraordinary.</p>
+
+          <div class="cta-strip" style="margin-bottom: 18px;">
+            Travel beautifully. Feel deeply. Return changed.
+          </div>
+
+          <div class="categories" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; padding: 0;">
+            <div class="cat-card" style="padding: 18px; min-height: 160px;">
+              <h3 style="font-size: 1.25rem;">Wellness with intention</h3>
+              <p class="small" style="min-height: 64px;">Restorative stays, mindfulness, and immersive reset experiences that help you come back renewed.</p>
+            </div>
+            <div class="cat-card" style="padding: 18px; min-height: 160px;">
+              <h3 style="font-size: 1.25rem;">Romance, reimagined</h3>
+              <p class="small" style="min-height: 64px;">Elegant escapes and intimate moments designed to deepen connection and create lasting memories.</p>
+            </div>
+            <div class="cat-card" style="padding: 18px; min-height: 160px;">
+              <h3 style="font-size: 1.25rem;">Adventure with polish</h3>
+              <p class="small" style="min-height: 64px;">Exciting, immersive journeys with luxury touches, seamless planning, and unforgettable moments.</p>
+            </div>
+            <div class="cat-card" style="padding: 18px; min-height: 160px;">
+              <h3 style="font-size: 1.25rem;">Experiences that stay with you</h3>
+              <p class="small" style="min-height: 64px;">From family escapes to quiet triumphs and big celebrations, every journey is tailored to feel personal.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <footer>
+        <p style="padding:18px">Questions? <a href="/en/Contact/">Talk to an advisor</a></p>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      document.querySelectorAll('.cat-card').forEach(card=>{
+        const btn = card.querySelector('.toggle');
+        btn.addEventListener('click', ()=>{
+          const open = card.classList.toggle('open');
+          btn.setAttribute('aria-expanded', String(open));
+          if(open) card.scrollIntoView({behavior:'smooth',block:'center'});
+        });
+
+        // add an Enquire button that links to the contact form with the selected experience
+        const key = card.getAttribute('data-key') || '';
+        const enqu = document.createElement('a');
+        enqu.className = 'btn btn-primary enquire';
+        enqu.href = '/en/Contact/?experience=' + encodeURIComponent(key) + '#contact';
+        enqu.textContent = 'Enquire about this';
+        // place the button after the toggle
+        btn.insertAdjacentElement('afterend', enqu);
+      });
+    })();
+  </script>
+</body>
+</html>

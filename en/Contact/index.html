@@ -18,6 +18,7 @@
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="/en/">Home</a>
           <a href="/en/tours/">Tours</a>
+          <a href="/en/experiences/">Experiences</a>
           <a href="/en/Contact/">Contact</a>
         </nav>
       </header>
@@ -37,10 +38,10 @@
           </div>
 
           <div class="card">
-            <form action="/en/Contact/submit" method="post" autocomplete="on">
-              <input type="text" name="name" placeholder="Your name" autocomplete="name" required />
-              <input type="email" name="email" placeholder="Email address" autocomplete="email" required />
-              <select name="destination" autocomplete="country-name">
+            <form id="contact-form" action="/en/Contact/submit" method="post" autocomplete="on">
+              <input id="contact-name" type="text" name="name" placeholder="Your name" autocomplete="name" required />
+              <input id="contact-email" type="email" name="email" placeholder="Email address" autocomplete="email" required />
+              <select id="contact-destination" name="destination" autocomplete="country-name">
                 <option value="">Select destination</option>
                 <option>Kenya</option>
                 <option>Tanzania</option>
@@ -53,7 +54,7 @@
                 <option>London</option>
               </select>
               <input type="text" name="travel_date" placeholder="Preferred travel dates" />
-              <textarea name="message" placeholder="Tell us about your trip ideas, group size, and budget"></textarea>
+              <textarea id="contact-message" name="message" placeholder="Tell us about your trip ideas, group size, and budget"></textarea>
               <button class="btn btn-primary" type="submit">Send inquiry</button>
             </form>
           </div>
@@ -65,5 +66,33 @@
       </footer>
     </div>
   </div>
+    <script>
+      (function(){
+        try{
+          const params = new URLSearchParams(location.search);
+          const exp = params.get('experience');
+          if(!exp) return;
+          const form = document.getElementById('contact-form');
+          const message = document.getElementById('contact-message');
+          const destination = document.getElementById('contact-destination');
+          if(message){
+            const pre = `Enquiry: ${exp}\n\nPlease provide options, pricing and availability for this experience.`;
+            if(!message.value) message.value = pre;
+          }
+          // if experience resembles a country, try to select
+          if(destination && ['Kenya','Tanzania','Rwanda','Zanzibar','South Africa','France','Germany','Thailand','London'].includes(capitalize(exp))){
+            destination.value = capitalize(exp);
+          }
+          // scroll to form
+          if(form){
+            form.scrollIntoView({behavior:'smooth', block:'center'});
+            const first = form.querySelector('input, textarea, select, button');
+            if(first) first.focus();
+          }
+        }catch(e){ console.error(e); }
+
+        function capitalize(s){ if(!s) return s; return s.charAt(0).toUpperCase()+s.slice(1); }
+      })();
+    </script>
 </body>
 </html>

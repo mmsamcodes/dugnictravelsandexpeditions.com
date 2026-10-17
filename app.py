@@ -1,4 +1,5 @@
 import os
+import posixpath
 import sqlite3
 import smtplib
 import uuid
@@ -116,11 +117,12 @@ def login():
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>Admin Login · Dugnic Travels</title>
+          <link rel="icon" type="image/jpeg" href="/downloads/logo.jpeg" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
           <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
           <style>
-            :root { --forest: #0f5a3e; --forest-deep: #083d2b; --gold: #c7922b; --cream: #f8f3e7; --ink: #172126; --muted: #53606a; }
+            :root { --forest: #0f5a3e; --forest-deep: #083d2b; --gold: #c7922b; --cream: #f8f3e7; --ink: #172126; --muted: #53606a; --border: rgba(8,61,43,0.1); }
             * { box-sizing: border-box; }
             body { margin: 0; font-family: "Roboto", Arial, sans-serif; background: linear-gradient(135deg, var(--cream), #fffdf8); color: var(--ink); }
             .shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
@@ -164,6 +166,7 @@ def admin_dashboard():
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>Admin Dashboard · Dugnic Travels</title>
+          <link rel="icon" type="image/jpeg" href="/downloads/logo.jpeg" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
           <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -281,6 +284,16 @@ def media(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
+@app.route('/favicon.svg')
+def favicon_svg():
+    return send_from_directory(os.path.join(app.root_path, 'downloads'), 'logo.jpeg', mimetype='image/jpeg')
+
+
+@app.route('/favicon.ico')
+def favicon_ico():
+    return send_from_directory(os.path.join(app.root_path, 'downloads'), 'logo.jpeg', mimetype='image/jpeg')
+
+
 @app.route('/css/<path:filename>')
 def css_static(filename):
     return send_from_directory(os.path.join(app.root_path, 'css'), filename)
@@ -295,16 +308,22 @@ def js_static(filename):
 @app.route('/en/')
 @app.route('/en/index.html')
 def en_home():
-    return serve_static_page(os.path.join('en'))
+    return send_from_directory(app.root_path, 'index.html')
+
+
+def normalize_route_path(path_value):
+    safe_value = path_value.replace('\\', '/').lstrip('/')
+    normalized = posixpath.normpath(safe_value)
+    if normalized in ('', '.', '..') or normalized.startswith('../'):
+        abort(404)
+    return normalized
 
 
 @app.route('/en/<path:path>')
 def serve_en_pages(path):
-    normalized_path = os.path.normpath(path)
-    if normalized_path.startswith('..') or normalized_path == '..':
-        abort(404)
+    normalized_path = normalize_route_path(path)
 
-    full_path = os.path.join(app.root_path, 'en', normalized_path)
+    full_path = os.path.join(app.root_path, 'en', *normalized_path.split('/')) if normalized_path else os.path.join(app.root_path, 'en')
     if os.path.isfile(full_path):
         return send_from_directory(os.path.join(app.root_path, 'en'), normalized_path)
     if os.path.isdir(full_path):
@@ -316,11 +335,9 @@ def serve_en_pages(path):
 
 @app.route('/<path:path>')
 def serve_static(path):
-    normalized_path = os.path.normpath(path)
-    if normalized_path.startswith('..') or normalized_path == '..':
-        abort(404)
+    normalized_path = normalize_route_path(path)
 
-    full_path = os.path.join(app.root_path, normalized_path)
+    full_path = os.path.join(app.root_path, *normalized_path.split('/')) if normalized_path else app.root_path
     if os.path.isfile(full_path):
         return send_from_directory(app.root_path, normalized_path)
     if os.path.isdir(full_path):
@@ -508,220 +525,7 @@ def uganda_page():
 
 @app.route('/')
 def home():
-    posts = get_posts()
-    return render_template_string('''
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>Dugnic Travels and Expeditions</title>
-      <meta name="description" content="Discover premium safari, beach, and cultural travel experiences with Dugnic Travels and Expeditions." />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-      <style>
-        :root {
-          color-scheme: light;
-          --forest: #0f5a3e;
-          --forest-deep: #083d2b;
-          --gold: #c7922b;
-          --gold-soft: #f4d68f;
-          --cream: #f8f3e7;
-          --ink: #172126;
-          --muted: #53606a;
-          --border: rgba(8, 61, 43, 0.12);
-          --shadow: 0 24px 70px rgba(8, 61, 43, 0.14);
-          --radius-lg: 28px;
-          --radius-md: 18px;
-          --font-display: "Gilda Display", Georgia, serif;
-          --font-body: "Roboto", "Segoe UI", Arial, sans-serif;
-        }
-        * { box-sizing: border-box; }
-        body {
-          margin: 0;
-          font-family: var(--font-body);
-          color: var(--ink);
-          line-height: 1.65;
-          background: radial-gradient(circle at top left, rgba(244, 214, 143, 0.32), transparent 28%), linear-gradient(135deg, var(--cream) 0%, #fdf9f0 100%);
-        }
-        a { color: inherit; text-decoration: none; }
-        img, video { display: block; max-width: 100%; }
-        .page-shell { max-width: 1200px; margin: 0 auto; padding: 24px; }
-        .site-card { background: rgba(255,255,255,0.95); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 28px; background: linear-gradient(135deg, var(--forest-deep), var(--forest)); color: #fff; }
-        .brand { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; letter-spacing: 0.04em; }
-        .nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
-        .nav-links a { color: #fff; padding: 8px 12px; border-radius: 999px; font-weight: 600; }
-        .hero { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; padding: 56px 28px 42px; background: linear-gradient(120deg, rgba(8, 61, 43, 0.95), rgba(15, 90, 62, 0.94)); color: #fff; }
-        .eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; background: rgba(255,255,255,0.08); font-size: 0.84rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
-        .hero h1, .hero h2, section h2, section h3, .card h3, .panel h3 { font-family: var(--font-display); line-height: 1.14; letter-spacing: 0.02em; }
-        .hero h1 { margin: 0 0 12px; font-size: clamp(2.2rem, 4.3vw, 3.4rem); }
-        .hero p { margin: 0; font-size: 1.04rem; color: rgba(255,255,255,0.88); }
-        .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
-        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 11px 16px; border-radius: 999px; font-weight: 700; }
-        .btn-primary { background: var(--gold); color: #fff; }
-        .btn-secondary { background: var(--cream); color: var(--forest-deep); }
-        .hero-panel, .panel { background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-md); padding: 20px; }
-        section { padding: 28px; }
-        .section-title { margin-bottom: 12px; color: var(--forest-deep); }
-        .section-intro { max-width: 720px; color: var(--muted); margin-top: 0; }
-        .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-        .card { background: #fff; border: 1px solid #e9e0d0; border-radius: var(--radius-md); padding: 18px; box-shadow: 0 10px 24px rgba(8, 61, 43, 0.05); }
-        .card h3 { margin-top: 0; margin-bottom: 8px; color: var(--forest-deep); }
-        .pill { display: inline-block; padding: 4px 10px; background: rgba(15, 90, 62, 0.08); color: var(--forest-deep); border-radius: 999px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-        .blog-shell { display: grid; gap: 18px; grid-template-columns: 1.35fr 0.65fr; align-items: start; }
-        .blog-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-        .blog-card { background: #fff; border: 1px solid rgba(8, 61, 43, 0.08); border-radius: 20px; overflow: hidden; box-shadow: 0 12px 28px rgba(8, 61, 43, 0.06); }
-        .blog-card__media { aspect-ratio: 4 / 3; background: linear-gradient(135deg, rgba(15, 90, 62, 0.12), rgba(199, 146, 43, 0.14)); }
-        .blog-card__media img, .blog-card__media video { width: 100%; height: 100%; object-fit: cover; }
-        .blog-card__body { padding: 16px; }
-        .blog-card__meta, .blog-card__footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); font-size: 0.92rem; }
-        .blog-card h3 { margin: 10px 0 8px; color: var(--forest-deep); }
-        .blog-card p { margin: 0; color: var(--muted); }
-        .blog-card__read { color: var(--gold); font-weight: 700; }
-        .blog-sidebar { display: grid; gap: 14px; }
-        .blog-panel { background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,243,231,0.9)); }
-        .blog-panel ul { padding-left: 18px; margin: 10px 0 0; }
-        footer { padding: 0 28px 28px; color: var(--muted); }
-        .admin-link { display: inline-block; margin-top: 6px; color: var(--forest-deep); font-weight: 700; }
-        @media (max-width: 860px) { .hero, .blog-shell { grid-template-columns: 1fr; } }
-        @media (max-width: 680px) { .page-shell { padding: 14px; } .topbar { padding: 16px 18px; } .hero, section { padding-left: 18px; padding-right: 18px; } }
-      </style>
-    </head>
-    <body>
-      <div class="page-shell">
-        <div class="site-card">
-          <header class="topbar">
-            <div class="brand">Dugnic Travels & Expeditions</div>
-            <nav class="nav-links" aria-label="Primary navigation">
-              <a href="/">Home</a>
-              <a href="/tours">Tours</a>
-              <a href="/contact">Contact</a>
-              <a href="/admin/login">Admin</a>
-            </nav>
-          </header>
-
-          <section class="hero">
-            <div>
-              <div class="eyebrow">Curated journeys • Trusted local expertise</div>
-              <h1>Travel beautifully through East Africa and beyond.</h1>
-              <p>From private safaris and island escapes to refined cultural journeys, we design trips that balance adventure, comfort, and unforgettable memories.</p>
-              <div class="hero-actions">
-                <a class="btn btn-primary" href="/tours">Explore tours</a>
-                <a class="btn btn-secondary" href="/contact">Plan your trip</a>
-              </div>
-            </div>
-            <div class="hero-panel">
-              <h3>Why travelers choose us</h3>
-              <ul>
-                <li>Fully tailored itineraries for couples, families, and groups</li>
-                <li>Thoughtful planning with local knowledge and reliable support</li>
-                <li>Luxury, comfort, and authentic experiences in every destination</li>
-              </ul>
-            </div>
-          </section>
-
-          <main>
-            <section>
-              <h2 class="section-title">Designed for memorable travel</h2>
-              <p class="section-intro">Every trip is shaped around your pace, interests, and sense of comfort so the journey feels effortless from the first idea to the final arrival.</p>
-              <div class="grid">
-                <article class="card"><h3>Inspired by the wild</h3><p>Safaris, coastlines, and landscapes are arranged with care, giving each journey a sense of wonder and calm.</p></article>
-                <article class="card"><h3>Built for comfort</h3><p>We blend premium stays, easy logistics, and expert guidance into a smooth and welcoming experience.</p></article>
-                <article class="card"><h3>Ready when you are</h3><p>Share your preferred pace, budget, and destination and we will shape a trip around your travel style.</p></article>
-              </div>
-            </section>
-
-            <section>
-              <h2 class="section-title">Our services</h2>
-              <p class="section-intro">Beyond curated trips, we also support clients with end-to-end travel and event solutions designed for businesses and private travelers alike.</p>
-              <div class="grid">
-                <article class="card"><h3>Tourism Consultancy</h3><p>Strategic guidance for destinations, travel planning, and growth-focused tourism initiatives.</p></article>
-                <article class="card"><h3>Destination Marketing</h3><p>Tailored marketing support that helps destinations and experiences reach the right audiences.</p></article>
-                <article class="card"><h3>Tour Services</h3><p>Seamless tour planning, logistics, and itinerary support for memorable journeys.</p></article>
-                <article class="card"><h3>Travel Management</h3><p>Professional coordination for efficient, comfortable, and well-organized travel arrangements.</p></article>
-                <article class="card"><h3>Training</h3><p>Capacity-building and travel industry training solutions that strengthen teams and service delivery.</p></article>
-                <article class="card"><h3>Events</h3><p>Carefully organized event experiences that blend planning precision with memorable execution.</p></article>
-                <article class="card"><h3>MICE</h3><p>Meetings, incentives, conferences, and exhibitions managed with professionalism and purpose.</p></article>
-              </div>
-            </section>
-
-            <section class="cta-banner">
-              <div class="split">
-                <div>
-                  <h2 class="section-title">Start with a destination</h2>
-                  <p class="section-intro">Whether you are planning a safari, a beach retreat, or a cultural escape, we will turn it into a refined itinerary you will remember.</p>
-                </div>
-                <div class="hero-actions">
-                  <a class="btn btn-primary" href="/tours">Browse destinations</a>
-                  <a class="btn btn-secondary" href="/contact">Talk to an advisor</a>
-                </div>
-              </div>
-            </section>
-
-            <section class="blog-section" id="blog-showcase">
-              <div class="section-heading">
-                <div class="eyebrow">Stories from the road</div>
-                <h2 class="section-title">A home for fresh trip updates and inspiration</h2>
-                <p class="section-intro">Step into a collection of inspiring travel stories, destination highlights, and unforgettable journeys designed to spark your next adventure.</p>
-              </div>
-              <div class="blog-shell">
-                <div class="blog-grid">
-                  {% for post in posts %}
-                    <article class="blog-card">
-                      <div class="blog-card__media">
-                        {% if post.media_filename %}
-                          {% if post.media_type == 'video' %}
-                            <video controls preload="metadata" src="/media/{{ post.media_filename }}"></video>
-                          {% else %}
-                            <img src="/media/{{ post.media_filename }}" alt="{{ post.title }}" />
-                          {% endif %}
-                        {% else %}
-                          <div class="blog-card__placeholder"></div>
-                        {% endif %}
-                      </div>
-                      <div class="blog-card__body">
-                        <div class="blog-card__meta">
-                          <span class="pill">{{ post.category }}</span>
-                          <span>{{ post.date }}</span>
-                        </div>
-                        <h3>{{ post.title }}</h3>
-                        <p>{{ post.excerpt }}</p>
-                        <div class="blog-card__footer">
-                          <span>{{ post.location }}</span>
-                          <span class="blog-card__read">Read story →</span>
-                        </div>
-                      </div>
-                    </article>
-                  {% endfor %}
-                </div>
-                <aside class="blog-sidebar">
-                  <div class="panel blog-panel">
-                    <h3>For the team</h3>
-                    <a class="btn btn-primary admin-link" href="/admin/login">Open admin dashboard</a>
-                  </div>
-                  <div class="panel blog-panel">
-                    <h3>What clients can look forward to</h3>
-                    <ul>
-                      <li>insider travel tips and real destination stories</li>
-                      <li>fresh images and short video highlights from each trip</li>
-                      <li>new itineraries, seasonal offers, and inspiration for your next journey</li>
-                    </ul>
-                  </div>
-                </aside>
-              </div>
-            </section>
-          </main>
-
-          <footer>
-            <p>Start with a destination, and we will shape the rest around your travel style.</p>
-          </footer>
-        </div>
-      </div>
-    </body>
-    </html>
-    ''', posts=posts)
+    return send_from_directory(app.root_path, 'index.html')
 
 
 def create_post(title, category, location, date, excerpt, content, media_filename=None, media_type=None):
@@ -741,9 +545,7 @@ def create_post(title, category, location, date, excerpt, content, media_filenam
 
 def get_posts():
     conn = get_db()
-    posts = conn.execute(
-        'SELECT * FROM posts ORDER BY id DESC'
-    ).fetchall()
+    posts = conn.execute('SELECT * FROM posts ORDER BY id DESC').fetchall()
     conn.close()
     return [dict(post) for post in posts]
 

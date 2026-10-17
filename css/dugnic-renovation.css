@@ -47,16 +47,34 @@ img { display: block; max-width: 100%; }
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 20px 28px;
   background: linear-gradient(135deg, var(--forest-deep), var(--forest));
   color: #fff;
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 20px rgba(8, 61, 43, 0.18);
+}
+
+.brand-text {
+  line-height: 1.1;
 }
 
 .nav-links {
@@ -332,7 +350,7 @@ section {
   overflow: hidden;
   border-radius: 18px;
   background: #edf3f7;
-  min-height: 260px;
+  aspect-ratio: 16 / 9;
 }
 
 .media-frame img,
@@ -340,7 +358,6 @@ section {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 260px;
   object-fit: cover;
   border-radius: 18px;
 }
@@ -670,6 +687,13 @@ footer {
   .split {
     grid-template-columns: 1fr;
   }
+  .topbar {
+    flex-wrap: wrap;
+  }
+  .brand,
+  .nav-links {
+    min-width: 0;
+  }
   .hero,
   .split {
     grid-template-columns: 1fr;
@@ -678,12 +702,34 @@ footer {
 }
 
 @media (max-width: 680px) {
-  .page-shell { padding: 14px; }
+  .page-shell { width: 100%; padding: 10px; }
+  .site-card { border-radius: 20px; }
   .topbar { padding: 16px 18px; }
-  .hero, section, .cta-banner { padding-left: 18px; padding-right: 18px; }
+  .hero, section, .cta-banner { min-width: 0; padding-left: 18px; padding-right: 18px; }
   .media-showcase { padding-left: 18px; padding-right: 18px; }
   .media-card { flex-basis: 84vw; }
-  .nav-links { width: 100%; }
+  .brand { flex: 1 1 100%; gap: 9px; font-size: 1.08rem; }
+  .brand-mark { flex: 0 0 38px; width: 38px; height: 38px; }
+  .brand-text { overflow-wrap: anywhere; }
+  .nav-links { width: 100%; gap: 4px; }
+  .nav-links a { padding: 7px 9px; font-size: .92rem; }
+  .hero-actions { gap: 9px; }
+  .hero-actions .btn { min-height: 44px; }
+  .grid, .blog-grid { grid-template-columns: minmax(0, 1fr); }
+  .modal-backdrop { padding: 10px; }
+  .modal-card { max-height: calc(100dvh - 20px); padding: 18px; }
+  .saved-post-item { flex-wrap: wrap; }
+}
+
+@media (max-width: 380px) {
+  .page-shell { padding: 6px; }
+  .topbar { padding: 14px 12px; }
+  .brand { font-size: .98rem; }
+  .brand-mark { flex-basis: 34px; width: 34px; height: 34px; }
+  .nav-links a { padding: 6px 7px; font-size: .86rem; }
+  .hero, section, .cta-banner { padding-left: 14px; padding-right: 14px; }
+  .media-showcase { padding-left: 14px; padding-right: 14px; }
+  .media-card { flex-basis: 88vw; }
 }
 
 @media (prefers-reduced-motion: reduce) {

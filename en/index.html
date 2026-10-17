@@ -2,19 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=/" />
+  <link rel="canonical" href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dugnic Travels and Expeditions</title>
   <meta name="description" content="Discover premium safari, beach, and cultural travel experiences with Dugnic Travels and Expeditions." />
+  <link rel="icon" type="image/jpeg" href="/downloads/logo.jpeg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/dugnic-renovation.css" />
+  <style>
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand-mark { width:42px; height:42px; border-radius:12px; object-fit:cover; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 20px rgba(8, 61, 43, 0.18); }
+    .brand-text { line-height:1.1; }
+    .media-carousel { position: relative; margin-top: 24px; }
+    .media-carousel-track { display:flex; overflow:hidden; }
+    .media-slide { display:none; width:100%; min-height:280px; border-radius:22px; overflow:hidden; background:#eef3f8; box-shadow:0 14px 30px rgba(10,30,50,0.08); }
+    .media-slide:first-child { display:grid; }
+    .media-slide { grid-template-columns: 1.2fr 0.8fr; }
+    .media-slide img { width:100%; height:100%; min-height:280px; object-fit:cover; }
+    .media-slide-content { padding:24px; background: linear-gradient(135deg, rgba(8,61,43,0.96), rgba(15,90,62,0.94)); color:#fff; display:flex; flex-direction:column; justify-content:center; }
+    .media-slide-content h3 { margin:0 0 10px; font-family:'Gilda Display', Georgia, serif; font-size:clamp(1.9rem, 3vw, 2.6rem); }
+    .media-slide-content p { margin:0; color:rgba(255,255,255,0.86); }
+    .media-carousel-controls { display:flex; justify-content:center; gap:12px; margin-top:18px; }
+    .carousel-btn { width:42px; height:42px; border-radius:50%; border:1px solid rgba(255,255,255,0.16); background:rgba(8,61,43,0.06); cursor:pointer; }
+    .carousel-btn:disabled { opacity:0.4; cursor:default; }
+  </style>
 </head>
 <body>
   <div class="page-shell">
     <div class="site-card">
       <header class="topbar">
-        <div class="brand">Dugnic Travels & Expeditions</div>
+        <div class="brand" aria-label="Dugnic Travels and Expeditions">
+          <img class="brand-mark" src="/downloads/logo.jpeg" alt="Dugnic Travels logo" />
+          <span class="brand-text">Dugnic Travels & Expeditions</span>
+        </div>
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="/en/">Home</a>
           <a href="/en/tours/">Tours</a>
@@ -40,6 +63,45 @@
             <li>Thoughtful planning with local knowledge and reliable support</li>
             <li>Luxury, comfort, and authentic experiences in every destination</li>
           </ul>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <div class="eyebrow">Featured escapes</div>
+          <h2 class="section-title">Explore a few of our signature journeys</h2>
+        </div>
+        <div class="media-carousel" aria-label="Featured destination carousel">
+          <div class="media-carousel-track">
+            <article class="media-slide">
+              <img src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=1200&q=80" alt="Zanzibar beach escape" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">Island calm</div>
+                <h3>Zanzibar</h3>
+                <p>Stone Town charm, turquoise water, and laid-back luxury along the coast.</p>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="https://images.unsplash.com/photo-1544735716-392feef3a6be?auto=format&fit=crop&w=1200&q=80" alt="Safari in East Africa" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">Wild in style</div>
+                <h3>Kenya & Tanzania</h3>
+                <p>Big skies, unforgettable game drives, and elegant safari camps in the wild.</p>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80" alt="Mountain scenery in Europe" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">Culture & heritage</div>
+                <h3>Europe</h3>
+                <p>Refined city stays, scenic routes, and timeless experiences across Europe.</p>
+              </div>
+            </article>
+          </div>
+          <div class="media-carousel-controls">
+            <button type="button" class="carousel-btn" id="home-carousel-prev" aria-label="Previous slide">←</button>
+            <button type="button" class="carousel-btn" id="home-carousel-next" aria-label="Next slide">→</button>
+          </div>
         </div>
       </section>
 
@@ -164,7 +226,37 @@
       <div id="blog-admin-content"></div>
     </div>
   </div>
+  <script>
+    const homeSlides = Array.from(document.querySelectorAll('.media-slide'));
+    const homePrev = document.getElementById('home-carousel-prev');
+    const homeNext = document.getElementById('home-carousel-next');
+    let homeIndex = 0;
 
+    function renderHomeCarousel() {
+      if (!homeSlides.length) return;
+      homeSlides.forEach((slide, index) => {
+        slide.style.display = index === homeIndex ? 'grid' : 'none';
+      });
+      if (homePrev) homePrev.disabled = homeIndex === 0;
+      if (homeNext) homeNext.disabled = homeIndex === homeSlides.length - 1;
+    }
+
+    if (homePrev && homeNext) {
+      homePrev.addEventListener('click', () => {
+        if (homeIndex > 0) {
+          homeIndex -= 1;
+          renderHomeCarousel();
+        }
+      });
+      homeNext.addEventListener('click', () => {
+        if (homeIndex < homeSlides.length - 1) {
+          homeIndex += 1;
+          renderHomeCarousel();
+        }
+      });
+    }
+    renderHomeCarousel();
+  </script>
   <script src="/js/blog.js"></script>
 </body>
 </html>

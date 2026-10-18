@@ -82,7 +82,7 @@
               </div>
             </article>
             <article class="media-slide">
-              <img src="https://images.unsplash.com/photo-1544735716-392feef3a6be?auto=format&fit=crop&w=1200&q=80" alt="Safari in East Africa" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1200&q=80" alt="Safari vehicle beneath an East African sunset" loading="lazy" />
               <div class="media-slide-content">
                 <div class="eyebrow">Wild in style</div>
                 <h3>Kenya & Tanzania</h3>
@@ -137,7 +137,7 @@
               <div class="panel blog-panel">
                 <h3>For the team</h3>
                 <p>Log in to add photos, videos, tour highlights, and polished travel stories that appear seamlessly on the homepage.</p>
-                <button type="button" class="btn btn-primary blog-admin-toggle">Open admin dashboard</button>
+                <a class="btn btn-primary" href="/admin/login">Open admin dashboard</a>
               </div>
               <div class="panel blog-panel">
                 <h3>What clients can look forward to</h3>
@@ -220,12 +220,6 @@
     </div>
   </div>
 
-  <div class="modal-backdrop is-hidden" id="blog-admin-panel" aria-hidden="true">
-    <div class="modal-card modal-card--wide" role="dialog" aria-modal="true">
-      <button class="modal-close" type="button" data-close-modal aria-label="Close admin dashboard">×</button>
-      <div id="blog-admin-content"></div>
-    </div>
-  </div>
   <script>
     const homeSlides = Array.from(document.querySelectorAll('.media-slide'));
     const homePrev = document.getElementById('home-carousel-prev');

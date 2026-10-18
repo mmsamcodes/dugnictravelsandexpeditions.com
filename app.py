@@ -1,5 +1,6 @@
 import os
 import posixpath
+import secrets
 import sqlite3
 import smtplib
 import uuid
@@ -7,11 +8,23 @@ from email.message import EmailMessage
 from functools import wraps
 from flask import Flask, abort, jsonify, redirect, render_template_string, request, send_from_directory, session, url_for
 from werkzeug.utils import secure_filename
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'dugnic-standalone-blog-secret'
-app.config['DATABASE'] = os.path.join(os.path.dirname(__file__), 'blog.sqlite3')
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
+app.secret_key = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+app.config['DATABASE'] = os.environ.get(
+    'DATABASE_PATH',
+    os.path.join(os.path.dirname(__file__), 'blog.sqlite3'),
+)
+app.config['UPLOAD_FOLDER'] = os.environ.get(
+    'UPLOAD_FOLDER',
+    os.path.join(os.path.dirname(__file__), 'uploads'),
+)
+app.config['ADMIN_USERNAME'] = os.environ.get('ADMIN_USERNAME')
+app.config['ADMIN_PASSWORD'] = os.environ.get('ADMIN_PASSWORD')
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('SESSION_COOKIE_SECURE', '').lower() in ('1', 'true', 'yes')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'mail.dugnictravelsandexpeditions.com')
@@ -34,6 +47,7 @@ def get_db():
 
 
 def init_db():
+    os.makedirs(os.path.dirname(os.path.abspath(app.config['DATABASE'])), exist_ok=True)
     conn = sqlite3.connect(app.config['DATABASE'])
     conn.execute(
         '''
@@ -51,8 +65,36 @@ def init_db():
         )
         '''
     )
+    conn.execute(
+        '''
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            username TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL
+        )
+        '''
+    )
+    username = (app.config.get('ADMIN_USERNAME') or '').strip()
+    password = app.config.get('ADMIN_PASSWORD') or ''
+    if bool(username) != bool(password):
+        conn.close()
+        raise RuntimeError('Set both ADMIN_USERNAME and ADMIN_PASSWORD to configure the admin account.')
+    if username and password:
+        conn.execute(
+            '''
+            INSERT INTO admin_users (id, username, password_hash)
+            VALUES (1, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                username = excluded.username,
+                password_hash = excluded.password_hash
+            ''',
+            (username, generate_password_hash(password)),
+        )
     conn.commit()
     conn.close()
+
+
+init_db()
 
 
 def send_mail(subject, body, reply_to=None):
@@ -94,7 +136,7 @@ def send_mail(subject, body, reply_to=None):
 def require_admin(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
-        if not session.get('admin'):
+        if not session.get('admin_user'):
             return redirect(url_for('login'))
         return view(*args, **kwargs)
 
@@ -103,12 +145,23 @@ def require_admin(view):
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def login():
+    error = None
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
-        password = request.form.get('password', '').strip()
-        if username == 'admin' and password == 'dugnic2026':
-            session['admin'] = True
+        password = request.form.get('password', '')
+        conn = get_db()
+        admin = conn.execute(
+            'SELECT username, password_hash FROM admin_users WHERE username = ?',
+            (username,),
+        ).fetchone()
+        conn.close()
+        if admin and check_password_hash(admin['password_hash'], password):
+            session.clear()
+            session['admin_user'] = admin['username']
             return redirect(url_for('admin_dashboard'))
+        error = 'Invalid username or password.'
+        if not admin and not app.config.get('ADMIN_USERNAME'):
+            error = 'Admin login is not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD on the server.'
 
     return render_template_string('''
         <!DOCTYPE html>
@@ -133,6 +186,7 @@ def login():
             input, textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #d8d0c0; font: inherit; }
             button { border: 0; cursor: pointer; padding: 12px 16px; border-radius: 999px; font-weight: 700; background: var(--gold); color: white; }
             .back-link { display: inline-block; margin-top: 14px; color: var(--forest); font-weight: 700; }
+            .error { color: #a12622; font-weight: 700; }
           </style>
         </head>
         <body>
@@ -141,18 +195,18 @@ def login():
               <div class="eyebrow">Private dashboard</div>
               <h1>Welcome back, admin</h1>
               <p>Use the dashboard to publish beautiful travel stories, upload media, and keep the homepage fresh.</p>
+              {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
               <form method="post">
                 <input name="username" placeholder="Username" required />
                 <input name="password" type="password" placeholder="Password" required />
                 <button type="submit">Enter dashboard</button>
               </form>
-              <p>Demo login: admin / dugnic2026</p>
               <a class="back-link" href="/">Return to the site</a>
             </div>
           </div>
         </body>
         </html>
-    ''')
+    ''', error=error)
 
 
 @app.route('/admin/dashboard')
@@ -198,7 +252,9 @@ def admin_dashboard():
                 <h1>Content dashboard</h1>
                 <p>Publish travel stories, add visuals, and keep the homepage feeling fresh.</p>
               </div>
-              <a class="secondary-link" href="/admin/logout">Log out</a>
+              <form method="post" action="/admin/logout">
+                <button type="submit">Log out</button>
+              </form>
             </div>
             <div class="grid">
               <div class="card">
@@ -268,9 +324,9 @@ def create_post_route():
     return redirect(url_for('admin_dashboard'))
 
 
-@app.route('/admin/logout')
+@app.route('/admin/logout', methods=['POST'])
 def logout():
-    session.pop('admin', None)
+    session.clear()
     return redirect(url_for('login'))
 
 
@@ -526,6 +582,38 @@ def uganda_page():
 @app.route('/')
 def home():
     return send_from_directory(app.root_path, 'index.html')
+
+
+WHATSAPP_WIDGET = '''
+<a class="whatsapp-widget" href="https://wa.me/254728618281?text=Hello%20Dugnic%20Travels%2C%20I%27d%20like%20to%20plan%20a%20trip." target="_blank" rel="noopener noreferrer" aria-label="Chat with Dugnic Travels on WhatsApp">
+  <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M16 3a12.8 12.8 0 0 0-11 19.3L3.3 29l6.9-1.8A12.9 12.9 0 1 0 16 3Zm0 23.5c-2 0-4-.5-5.7-1.6l-.4-.2-4.1 1.1 1.1-4-.3-.4A10.5 10.5 0 1 1 16 26.5Zm5.8-7.9c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.6 8.6 0 0 1-2.5-1.5 9.3 9.3 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.7l.5-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4s-1 1-1 2.3 1 2.6 1.2 2.8c.1.2 2 3.1 4.9 4.3.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2.1-1.4.3-.7.3-1.3.2-1.4s-.3-.2-.6-.4Z"/>
+  </svg>
+  <span>WhatsApp</span>
+</a>
+'''
+
+
+@app.after_request
+def add_whatsapp_widget(response):
+    if response.mimetype != 'text/html':
+        return response
+
+    response.direct_passthrough = False
+    html = response.get_data(as_text=True)
+    if '/css/dugnic-renovation.css' not in html:
+        head_end = html.lower().rfind('</head>')
+        if head_end >= 0:
+            stylesheet = '<link rel="stylesheet" href="/css/dugnic-renovation.css" />'
+            html = html[:head_end] + stylesheet + html[head_end:]
+
+    if 'class="whatsapp-widget"' not in html:
+        body_end = html.lower().rfind('</body>')
+        if body_end >= 0:
+            html = html[:body_end] + WHATSAPP_WIDGET + html[body_end:]
+
+    response.set_data(html)
+    return response
 
 
 def create_post(title, category, location, date, excerpt, content, media_filename=None, media_type=None):

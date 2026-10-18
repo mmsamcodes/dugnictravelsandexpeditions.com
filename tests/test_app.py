@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import tempfile
 import unittest
 
@@ -12,6 +13,8 @@ class BlogAppTests(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['DATABASE'] = self.db_path
         app.config['UPLOAD_FOLDER'] = os.path.join(self.temp_dir.name, 'uploads')
+        app.config['ADMIN_USERNAME'] = 'test-admin'
+        app.config['ADMIN_PASSWORD'] = 'test-only-password'
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
         with app.app_context():
@@ -47,6 +50,75 @@ class BlogAppTests(unittest.TestCase):
         self.assertIn('Dugnic Travels & Expeditions', response.get_data(as_text=True))
         self.assertIn('Stories from the road', response.get_data(as_text=True))
 
+    def test_whatsapp_widget_links_to_business_number_on_home_and_contact(self):
+        client = app.test_client()
+        expected_link = 'https://wa.me/254728618281?text=Hello%20Dugnic%20Travels%2C%20I%27d%20like%20to%20plan%20a%20trip.'
+
+        for route in ('/', '/en/Contact/'):
+            with self.subTest(route=route):
+                response = client.get(route)
+                html = response.get_data(as_text=True)
+                self.assertEqual(response.status_code, 200)
+                self.assertIn('class="whatsapp-widget"', html)
+                self.assertIn(expected_link, html)
+                self.assertIn('aria-label="Chat with Dugnic Travels on WhatsApp"', html)
+
+    def test_whatsapp_widget_is_injected_once_on_site_and_admin_pages(self):
+        client = app.test_client()
+        for route in ('/', '/en/kenya/', '/en/tours/', '/admin/login'):
+            with self.subTest(route=route):
+                response = client.get(route)
+                html = response.get_data(as_text=True)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(html.count('class="whatsapp-widget"'), 1)
+                self.assertIn('/css/dugnic-renovation.css', html)
+
+    def test_admin_login_uses_hashed_database_credentials_and_protects_dashboard(self):
+        client = app.test_client()
+        unauthorized = client.get('/admin/dashboard')
+        self.assertEqual(unauthorized.status_code, 302)
+        self.assertIn('/admin/login', unauthorized.headers['Location'])
+
+        bad_login = client.post('/admin/login', data={
+            'username': 'test-admin',
+            'password': 'wrong-password',
+        })
+        self.assertEqual(bad_login.status_code, 200)
+        self.assertIn('Invalid username or password.', bad_login.get_data(as_text=True))
+        self.assertEqual(client.get('/admin/dashboard').status_code, 302)
+
+        with app.app_context():
+            conn = sqlite3.connect(app.config['DATABASE'])
+            row = conn.execute(
+                'SELECT password_hash FROM admin_users WHERE username = ?',
+                ('test-admin',),
+            ).fetchone()
+            conn.close()
+        self.assertIsNotNone(row)
+        self.assertNotEqual(row[0], app.config['ADMIN_PASSWORD'])
+        self.assertTrue(row[0].startswith('scrypt:'))
+
+        login_response = client.post('/admin/login', data={
+            'username': 'test-admin',
+            'password': app.config['ADMIN_PASSWORD'],
+        })
+        self.assertEqual(login_response.status_code, 302)
+        self.assertIn('/admin/dashboard', login_response.headers['Location'])
+        self.assertEqual(client.get('/admin/dashboard').status_code, 200)
+
+        logout_response = client.post('/admin/logout')
+        self.assertEqual(logout_response.status_code, 302)
+        self.assertEqual(client.get('/admin/dashboard').status_code, 302)
+
+    def test_blog_frontend_has_no_demo_login_credentials_or_local_auth(self):
+        client = app.test_client()
+        response = client.get('/js/blog.js')
+        source = response.get_data(as_text=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('dugnic2026', source)
+        self.assertNotIn('dugnicBlogAuth', source)
+        self.assertIn("fetch('/api/posts')", source)
+
     def test_homepage_routes_share_video_dropdown_and_video_assets(self):
         client = app.test_client()
         root_response = client.get('/')
@@ -62,8 +134,7 @@ class BlogAppTests(unittest.TestCase):
 
         for image_path in (
             '/assets/media/zanzibar-ocean.webp',
-            '/images/1024%252C662x390%252B6%252B0/12056475/LakeDuluti.jpg',
-            '/images/640/12056893/louvremuseum.jpg',
+            '/images/1024%252C1920x1129%252B0%252B75/12152187/blue-wildebeests-7416195_1920.jpg',
         ):
             with self.subTest(image_path=image_path):
                 self.assertIn(image_path, root_html)
@@ -89,11 +160,14 @@ class BlogAppTests(unittest.TestCase):
         tours_html = tours_response.get_data(as_text=True)
         self.assertIn('/images/976/12057880/Bwindi2.webp', tours_html)
         self.assertIn('/images/675/12057220/Zanzibar.jpeg', tours_html)
+        self.assertIn('/images/1024%252C662x390%252B6%252B0/12056475/LakeDuluti.jpg', tours_html)
         uganda_image = client.get('/images/976/12057880/Bwindi2.webp')
         zanzibar_image = client.get('/images/675/12057220/Zanzibar.jpeg')
+        tanzania_image = client.get('/images/1024%252C662x390%252B6%252B0/12056475/LakeDuluti.jpg')
         self.assertEqual(uganda_image.status_code, 200)
         self.assertEqual(zanzibar_image.status_code, 200)
-        self.assertNotEqual(uganda_image.data, zanzibar_image.data)
+        self.assertEqual(tanzania_image.status_code, 200)
+        self.assertEqual(len({uganda_image.data, zanzibar_image.data, tanzania_image.data}), 3)
 
         contact_response = client.get('/contact')
         self.assertEqual(contact_response.status_code, 200)
@@ -163,6 +237,33 @@ class BlogAppTests(unittest.TestCase):
                 media_response = client.get(media_path)
                 self.assertEqual(media_response.status_code, 200)
                 self.assertTrue(media_response.data)
+
+    def test_short_destination_galleries_use_distinct_local_photos(self):
+        client = app.test_client()
+        gallery_photos = {
+            'france': ('/images/640/12056893/louvremuseum.jpg',),
+            'germany': ('/images/675/12057051/Cathedral2.jpeg',),
+            'kenya': (
+                '/images/1024%252C1223x720%252B28%252B0/12078166/L.Nakuru1.jpg',
+                '/images/1024%252C662x390%252B6%252B0/12058369/Kilifi1.jpeg',
+            ),
+            'tanzania': ('/images/675/12057844/Sere4.jpeg',),
+            'thailand': ('/images/675/12057115/Grandpalace.jpg',),
+        }
+
+        for destination, image_paths in gallery_photos.items():
+            with self.subTest(destination=destination):
+                page_response = client.get(f'/en/{destination}/')
+                html = page_response.get_data(as_text=True)
+                self.assertEqual(page_response.status_code, 200)
+                self.assertEqual(len(set(image_paths)), len(image_paths))
+
+                for image_path in image_paths:
+                    with self.subTest(image_path=image_path):
+                        self.assertIn(image_path, html)
+                        image_response = client.get(image_path)
+                        self.assertEqual(image_response.status_code, 200)
+                        self.assertTrue(image_response.data)
 
     def test_thailand_destination_uses_flag_palette(self):
         client = app.test_client()

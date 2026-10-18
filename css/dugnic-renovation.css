@@ -244,7 +244,7 @@ section {
 
 .destination-grid {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
-  grid-auto-rows: 1fr;
+  grid-auto-rows: auto;
   align-items: stretch;
 }
 
@@ -260,11 +260,18 @@ section {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  padding: 14px;
 }
 
 .destination-grid > .card > .btn:last-child {
   align-self: flex-start;
   margin-top: auto;
+}
+
+.destination-grid > .card > p {
+  font-size: 0.94rem;
+  line-height: 1.5;
+  margin-bottom: 10px;
 }
 
 .service-image,
@@ -275,6 +282,13 @@ section {
   margin: -18px -18px 16px;
   object-fit: cover;
   border-radius: 17px 17px 0 0;
+}
+
+.destination-grid .destination-image {
+  width: calc(100% + 28px);
+  height: 136px;
+  margin: -14px -14px 12px;
+  border-radius: 15px 15px 0 0;
 }
 
 .destination-photo-credit {

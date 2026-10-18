@@ -214,6 +214,10 @@ class BlogAppTests(unittest.TestCase):
         dashboard_html = dashboard_response.get_data(as_text=True)
         self.assertIn('.shell .card p { color: #37444b;', dashboard_html)
         self.assertIn('input::placeholder, textarea::placeholder { color: #59636b;', dashboard_html)
+        self.assertIn('background: #083d2b;', dashboard_html)
+        self.assertIn('.topbar h1 { color: #fff; }', dashboard_html)
+        self.assertIn('.topbar p { margin-bottom: 0; color: #fff; }', dashboard_html)
+        self.assertNotIn('class="whatsapp-widget"', dashboard_html)
         self.assertIn(f'/admin/posts/{post_id}/delete', dashboard_html)
         self.assertIn('Delete story', dashboard_html)
 

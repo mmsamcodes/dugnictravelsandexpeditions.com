@@ -240,7 +240,9 @@ def admin_dashboard():
             .shell { color: #172126; font-size: 16px; line-height: 1.6; }
             .shell .card p { color: #37444b; font-size: 1rem; line-height: 1.6; }
             .shell .post-item h3 { font-size: 1.3rem; line-height: 1.35; }
-            .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
+            .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; padding: 20px 24px; border: 1px solid rgba(8,61,43,0.1); border-radius: 20px; background: #083d2b; box-shadow: 0 12px 30px rgba(8,61,43,0.08); }
+            .topbar h1 { color: #fff; }
+            .topbar p { margin-bottom: 0; color: #fff; }
             h1, h2, h3 { font-family: "Gilda Display", Georgia, serif; color: var(--forest-deep); margin: 0 0 10px; }
             p { color: var(--muted); }
             form { display: grid; gap: 12px; }
@@ -680,7 +682,7 @@ def add_whatsapp_widget(response):
             stylesheet = '<link rel="stylesheet" href="/css/dugnic-renovation.css" />'
             html = html[:head_end] + stylesheet + html[head_end:]
 
-    if 'class="whatsapp-widget"' not in html:
+    if request.endpoint != 'admin_dashboard' and 'class="whatsapp-widget"' not in html:
         body_end = html.lower().rfind('</body>')
         if body_end >= 0:
             html = html[:body_end] + WHATSAPP_WIDGET + html[body_end:]

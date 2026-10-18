@@ -390,12 +390,29 @@ section {
 }
 
 .media-frame img,
-.media-frame video {
+.media-frame video,
+.media-frame iframe {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 18px;
+}
+
+.media-frame iframe {
+  border: 0;
+}
+
+.media-credit {
+  margin: 10px 2px 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.media-credit a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 form {

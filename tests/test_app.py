@@ -2,8 +2,43 @@ import os
 import sqlite3
 import tempfile
 import unittest
+from hashlib import sha256
+from html.parser import HTMLParser
 
 from app import app, init_db, create_post, get_posts
+
+
+class GalleryMediaParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.in_gallery = False
+        self.gallery_depth = 0
+        self.images = []
+        self.videos = []
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        classes = attributes.get('class', '').split()
+        if not self.in_gallery and tag == 'div' and 'media-grid' in classes:
+            self.in_gallery = True
+            self.gallery_depth = 1
+            return
+
+        if not self.in_gallery:
+            return
+
+        if tag == 'div':
+            self.gallery_depth += 1
+        elif tag == 'img':
+            self.images.append(attributes.get('src'))
+        elif tag in ('video', 'iframe'):
+            self.videos.append(attributes.get('src'))
+
+    def handle_endtag(self, tag):
+        if self.in_gallery and tag == 'div':
+            self.gallery_depth -= 1
+            if self.gallery_depth == 0:
+                self.in_gallery = False
 
 
 class BlogAppTests(unittest.TestCase):
@@ -238,6 +273,36 @@ class BlogAppTests(unittest.TestCase):
                 self.assertEqual(media_response.status_code, 200)
                 self.assertTrue(media_response.data)
 
+    def test_destination_carousels_have_ten_unique_photos_and_one_unique_video(self):
+        client = app.test_client()
+        image_sources = []
+        image_hashes = []
+        video_sources = []
+
+        for destination in (
+            'france', 'germany', 'kenya', 'london', 'rwanda',
+            'south-africa', 'tanzania', 'thailand', 'uganda', 'zanzibar',
+        ):
+            with self.subTest(destination=destination):
+                response = client.get(f'/en/{destination}/')
+                self.assertEqual(response.status_code, 200)
+                gallery = GalleryMediaParser()
+                gallery.feed(response.get_data(as_text=True))
+                self.assertEqual(len(gallery.images), 10)
+                self.assertEqual(len(set(gallery.images)), 10)
+                self.assertEqual(len(gallery.videos), 1)
+                self.assertIn('Wikimedia Commons', response.get_data(as_text=True))
+                for image_source in gallery.images:
+                    image_response = client.get(image_source)
+                    self.assertEqual(image_response.status_code, 200, image_source)
+                    image_hashes.append(sha256(image_response.get_data()).hexdigest())
+                image_sources.extend(gallery.images)
+                video_sources.extend(gallery.videos)
+
+        self.assertEqual(len(set(image_sources)), 100)
+        self.assertEqual(len(set(image_hashes)), 100)
+        self.assertEqual(len(set(video_sources)), 10)
+
     def test_short_destination_galleries_use_distinct_local_photos(self):
         client = app.test_client()
         gallery_photos = {
@@ -248,7 +313,6 @@ class BlogAppTests(unittest.TestCase):
                 '/images/1024%252C662x390%252B6%252B0/12058369/Kilifi1.jpeg',
             ),
             'tanzania': ('/images/675/12057844/Sere4.jpeg',),
-            'thailand': ('/images/675/12057115/Grandpalace.jpg',),
         }
 
         for destination, image_paths in gallery_photos.items():
@@ -264,6 +328,15 @@ class BlogAppTests(unittest.TestCase):
                         image_response = client.get(image_path)
                         self.assertEqual(image_response.status_code, 200)
                         self.assertTrue(image_response.data)
+
+    def test_thailand_gallery_omits_duplicate_grand_palace_photo_variant(self):
+        client = app.test_client()
+        response = client.get('/en/thailand/')
+        html = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('/assets/media/destinations/bangkok-grand-palace.webp', html)
+        self.assertNotIn('/images/675/12057115/Grandpalace.jpg', html)
 
     def test_thailand_destination_uses_flag_palette(self):
         client = app.test_client()

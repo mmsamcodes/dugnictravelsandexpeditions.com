@@ -4,6 +4,7 @@ import secrets
 import sqlite3
 import smtplib
 import uuid
+import json
 from email.message import EmailMessage
 from functools import wraps
 from flask import Flask, abort, jsonify, redirect, render_template_string, request, send_from_directory, session, url_for
@@ -61,10 +62,16 @@ def init_db():
             content TEXT NOT NULL,
             media_filename TEXT,
             media_type TEXT,
+            media_items TEXT,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
         '''
     )
+    post_columns = {
+        column[1] for column in conn.execute('PRAGMA table_info(posts)')
+    }
+    if 'media_items' not in post_columns:
+        conn.execute('ALTER TABLE posts ADD COLUMN media_items TEXT')
     conn.execute(
         '''
         CREATE TABLE IF NOT EXISTS admin_users (
@@ -230,17 +237,26 @@ def admin_dashboard():
             body { margin: 0; font-family: "Roboto", Arial, sans-serif; background: linear-gradient(135deg, var(--cream), #fffdf8); color: var(--ink); }
             .shell { max-width: 1180px; margin: 0 auto; padding: 24px; }
             .card { background: white; border: 1px solid var(--border); border-radius: 24px; padding: 24px; box-shadow: 0 20px 48px rgba(8,61,43,0.1); margin-bottom: 18px; }
+            .shell { color: #172126; font-size: 16px; line-height: 1.6; }
+            .shell .card p { color: #37444b; font-size: 1rem; line-height: 1.6; }
+            .shell .post-item h3 { font-size: 1.3rem; line-height: 1.35; }
             .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
             h1, h2, h3 { font-family: "Gilda Display", Georgia, serif; color: var(--forest-deep); margin: 0 0 10px; }
             p { color: var(--muted); }
             form { display: grid; gap: 12px; }
             input, textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #d8d0c0; font: inherit; }
+            input, textarea { color: #172126; background-color: #fff; }
+            input::placeholder, textarea::placeholder { color: #59636b; opacity: 1; }
             textarea { min-height: 110px; resize: vertical; }
             button { border: 0; cursor: pointer; padding: 12px 16px; border-radius: 999px; font-weight: 700; background: var(--gold); color: white; }
             .secondary-link { color: var(--forest); font-weight: 700; }
             .grid { display: grid; gap: 18px; grid-template-columns: 1.1fr 0.9fr; }
             .post-item { padding: 12px 0; border-top: 1px solid rgba(8,61,43,0.08); }
             .post-item:first-child { border-top: 0; padding-top: 0; }
+            .delete-form { display: inline-block; margin-top: 4px; }
+            .delete-button { background: #a12622; }
+            .shell .pill { color: #083d2b; font-size: 0.85rem; }
+            .upload-help { margin: -4px 0 0; color: #4b565e; font-size: 0.92rem; }
             .pill { display: inline-block; padding: 4px 10px; background: rgba(15,90,62,0.08); color: var(--forest-deep); border-radius: 999px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
             @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
           </style>
@@ -266,7 +282,9 @@ def admin_dashboard():
                   <input name="date" type="date" />
                   <textarea name="excerpt" placeholder="Short intro"></textarea>
                   <textarea name="content" placeholder="Full story" required></textarea>
-                  <input name="media" type="file" accept="image/*,video/*" />
+                  <label for="post-media">Story photos and videos</label>
+                  <input id="post-media" name="media" type="file" accept="image/*,video/*" multiple />
+                  <p class="upload-help">Select one or more photos and videos. They will appear together in the story gallery.</p>
                   <button type="submit">Publish to homepage</button>
                 </form>
               </div>
@@ -277,10 +295,15 @@ def admin_dashboard():
                     <span class="pill">{{ post.category }}</span>
                     <h3>{{ post.title }}</h3>
                     <p>{{ post.excerpt }}</p>
-                    {% if post.media_filename %}
-                      <p>Media attached: {{ post.media_filename }}</p>
+                    {% if post.media_items %}
+                      <p>Gallery: {{ post.media_items|length }} item{% if post.media_items|length != 1 %}s{% endif %}</p>
                     {% endif %}
+                    <form class="delete-form" method="post" action="{{ url_for('delete_post_route', post_id=post.id) }}" onsubmit="return confirm('Delete this story permanently?');">
+                      <button class="delete-button" type="submit">Delete story</button>
+                    </form>
                   </div>
+                {% else %}
+                  <p>No stories have been published yet.</p>
                 {% endfor %}
               </div>
             </div>
@@ -300,16 +323,31 @@ def create_post_route():
     excerpt = request.form.get('excerpt', '').strip()
     content = request.form.get('content', '').strip()
 
-    media_filename = None
-    media_type = None
-    if 'media' in request.files and request.files['media'].filename:
-        upload = request.files['media']
+    uploads = [
+        upload for upload in request.files.getlist('media')
+        if upload and upload.filename
+    ]
+    validated_uploads = []
+    for upload in uploads:
         filename = secure_filename(upload.filename)
+        if not filename:
+            abort(400, description='A media file has an invalid filename.')
+        if upload.mimetype.startswith('image/'):
+            media_type = 'image'
+        elif upload.mimetype.startswith('video/'):
+            media_type = 'video'
+        else:
+            abort(400, description='Only image and video files can be added to a story.')
+        validated_uploads.append((upload, filename, media_type))
+
+    media_items = []
+    for upload, filename, media_type in validated_uploads:
         unique_name = f"{uuid.uuid4().hex}_{filename}"
         upload_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
         upload.save(upload_path)
-        media_filename = unique_name
-        media_type = 'video' if upload.mimetype.startswith('video/') else 'image'
+        media_items.append({'filename': unique_name, 'type': media_type})
+
+    first_media = media_items[0] if media_items else None
 
     create_post(
         title=title,
@@ -318,9 +356,44 @@ def create_post_route():
         date=date,
         excerpt=excerpt,
         content=content,
-        media_filename=media_filename,
-        media_type=media_type,
+        media_filename=first_media['filename'] if first_media else None,
+        media_type=first_media['type'] if first_media else None,
+        media_items=media_items,
     )
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/admin/posts/<int:post_id>/delete', methods=['POST'])
+@require_admin
+def delete_post_route(post_id):
+    conn = get_db()
+    post = conn.execute(
+        'SELECT media_filename, media_items FROM posts WHERE id = ?',
+        (post_id,),
+    ).fetchone()
+    if post is None:
+        conn.close()
+        abort(404)
+
+    try:
+        media_items = json.loads(post['media_items']) if post['media_items'] else []
+    except json.JSONDecodeError as exc:
+        conn.close()
+        raise RuntimeError(f'Invalid media gallery data for blog post {post_id}.') from exc
+
+    conn.execute('DELETE FROM posts WHERE id = ?', (post_id,))
+    conn.commit()
+    conn.close()
+
+    media_filenames = {item['filename'] for item in media_items}
+    if post['media_filename']:
+        media_filenames.add(post['media_filename'])
+    for media_filename in media_filenames:
+        if secure_filename(media_filename) == media_filename:
+            media_path = os.path.join(app.config['UPLOAD_FOLDER'], media_filename)
+            if os.path.isfile(media_path):
+                os.remove(media_path)
+
     return redirect(url_for('admin_dashboard'))
 
 
@@ -616,14 +689,31 @@ def add_whatsapp_widget(response):
     return response
 
 
-def create_post(title, category, location, date, excerpt, content, media_filename=None, media_type=None):
+def create_post(
+    title,
+    category,
+    location,
+    date,
+    excerpt,
+    content,
+    media_filename=None,
+    media_type=None,
+    media_items=None,
+):
     conn = get_db()
     cursor = conn.execute(
         '''
-        INSERT INTO posts (title, category, location, date, excerpt, content, media_filename, media_type)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO posts (
+            title, category, location, date, excerpt, content,
+            media_filename, media_type, media_items
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''',
-        (title, category, location, date, excerpt, content, media_filename, media_type),
+        (
+            title, category, location, date, excerpt, content,
+            media_filename, media_type,
+            json.dumps(media_items) if media_items else None,
+        ),
     )
     conn.commit()
     post_id = cursor.lastrowid
@@ -635,7 +725,25 @@ def get_posts():
     conn = get_db()
     posts = conn.execute('SELECT * FROM posts ORDER BY id DESC').fetchall()
     conn.close()
-    return [dict(post) for post in posts]
+    results = []
+    for row in posts:
+        post = dict(row)
+        if post.get('media_items'):
+            try:
+                post['media_items'] = json.loads(post['media_items'])
+            except json.JSONDecodeError as exc:
+                raise RuntimeError(
+                    f"Invalid media gallery data for blog post {post['id']}."
+                ) from exc
+        elif post.get('media_filename'):
+            post['media_items'] = [{
+                'filename': post['media_filename'],
+                'type': post.get('media_type') or 'image',
+            }]
+        else:
+            post['media_items'] = []
+        results.append(post)
+    return results
 
 
 if __name__ == '__main__':

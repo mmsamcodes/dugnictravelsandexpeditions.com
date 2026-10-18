@@ -44,7 +44,7 @@
     }
 
     postsGrid.innerHTML = posts.map((post) => {
-      const media = renderMedia(post);
+      const media = renderMedia(post, true);
       return `
         <article class="blog-card" data-open-post="${escapeHtml(post.id)}">
           <div class="blog-card__media">${media || '<div class="blog-card__placeholder">Trip story</div>'}</div>
@@ -65,16 +65,33 @@
     }).join('');
   }
 
-  function renderMedia(post) {
-    if (!post.media_filename) {
+  function renderMedia(post, preview = false) {
+    const items = Array.isArray(post.media_items)
+      ? post.media_items
+      : (post.media_filename
+        ? [{ filename: post.media_filename, type: post.media_type || 'image' }]
+        : []);
+    if (!items.length) {
       return '';
     }
 
-    const mediaUrl = `/media/${encodeURIComponent(post.media_filename)}`;
-    if (post.media_type === 'video') {
-      return `<video controls preload="metadata" playsinline src="${mediaUrl}"></video>`;
+    const renderItem = (item) => {
+      const mediaUrl = `/media/${encodeURIComponent(item.filename)}`;
+      if (item.type === 'video') {
+        return `<video controls preload="metadata" playsinline aria-label="${escapeHtml(post.title || 'Travel story')} video" src="${mediaUrl}"></video>`;
+      }
+      return `<img src="${mediaUrl}" alt="${escapeHtml(post.title || 'Travel story')}" loading="lazy" />`;
+    };
+
+    if (preview) {
+      return `${renderItem(items[0])}${items.length > 1
+        ? `<span class="blog-card__media-count">${items.length} gallery items</span>`
+        : ''}`;
     }
-    return `<img src="${mediaUrl}" alt="${escapeHtml(post.title || 'Travel story')}" loading="lazy" />`;
+
+    return `<div class="blog-media-gallery">${items.map((item) => `
+      <figure class="blog-media-gallery__item">${renderItem(item)}</figure>
+    `).join('')}</div>`;
   }
 
   function handleDocumentClick(event) {
@@ -90,6 +107,9 @@
 
     const postCard = target.closest('[data-open-post]');
     if (postCard) {
+      if (target.closest('.blog-card__media video')) {
+        return;
+      }
       openPost(postCard.getAttribute('data-open-post'));
     }
   }

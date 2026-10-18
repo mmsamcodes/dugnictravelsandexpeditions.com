@@ -36,4 +36,15 @@ SQLite is sufficient for this single-admin site and its blog; a separate MySQL d
 6. Keep the data directory in persistent storage during deployments and backups. Do not place it under a publicly served directory. Ensure the app process can create the SQLite database and upload directory.
 7. Enable HTTPS, then test `/`, `/admin/login`, `/admin/dashboard`, `/api/posts`, and the contact form. The blog dashboard is protected by the server-side login; the browser does not store an admin login flag or password.
 
+### Updating the site without losing blog content
+
+The website code and blog data are separate only when `DATABASE_PATH` and `UPLOAD_FOLDER` point to the private persistent data directory described above. Before changing or uploading site files:
+
+1. Confirm those two cPanel environment variables point outside the application root and `public_html`.
+2. Back up the SQLite database file and the entire uploads directory.
+3. Upload or replace only website code and static assets. Do not delete, overwrite, or include the private data directory in a site-file replacement.
+4. Restart the app and confirm existing posts and uploaded media still appear.
+
+If either environment variable is unset, the app defaults to `blog.sqlite3` and `uploads` inside the application directory. In that configuration, replacing or deleting the application directory can affect blog content and media. Back up and configure the existing production data paths before doing a code-only update; do not point the app at a new empty database unless you intend to start a separate blog.
+
 To rotate the admin password, update `ADMIN_PASSWORD` in cPanel and restart the app. The configured credentials are re-hashed into the database at startup.

@@ -14,6 +14,7 @@
     .brand { display:flex; align-items:center; gap:12px; }
     .brand-mark { width:42px; height:42px; border-radius:12px; object-fit:cover; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 20px rgba(8, 61, 43, 0.18); }
     .brand-text { line-height:1.1; }
+    .brand:focus-visible { outline:3px solid #f4d68f; outline-offset:4px; border-radius:6px; }
     .media-carousel { position: relative; margin-top: 24px; }
     .media-carousel-track { display:flex; overflow:hidden; }
     .media-slide { display:none; width:100%; min-height:280px; border-radius:22px; overflow:hidden; background:#eef3f8; box-shadow:0 14px 30px rgba(10,30,50,0.08); }
@@ -30,16 +31,18 @@
     .niche-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:clamp(20px,4vw,40px);align-items:center;width:100%}
     .niche-left{min-width:0}
     .niche-media{width:100%;max-width:none;text-align:center}
-    .media-poster{position:relative;aspect-ratio:16/10;min-height:200px;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(20,30,50,0.12);background:#edf3f7;border:1px solid rgba(20,30,50,0.08)}
+    .media-poster{position:relative;aspect-ratio:16/9;min-height:200px;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(20,30,50,0.12);background:#edf3f7;border:1px solid rgba(20,30,50,0.08)}
     .media-stage{position:absolute;inset:0;width:100%;height:100%}
-    .media-stage img,.media-stage video{display:block;width:100%;height:100%;object-fit:cover}
+    .media-stage img,.media-stage video,.media-stage iframe{display:block;width:100%;height:100%;border:0}
+    .media-stage img{object-fit:cover}
+    .media-stage video{object-fit:contain;background:#000}
     .play-button{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;padding:12px 16px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2}
     .niche-selector{display:grid;gap:6px;margin-top:18px;max-width:360px}
     .niche-selector label{font-weight:700}
     .niche-selector select{min-height:46px;background:#fff}
     .media-caption{margin-top:8px;color:rgba(255,255,255,.82);font-size:clamp(.85rem,1.4vw,.95rem)}
     .media-slide img{min-width:0}
-    @media(max-width:860px){.niche-hero{grid-template-columns:1fr}.niche-media{max-width:640px;margin:0 auto}.media-poster{aspect-ratio:16/9}.niche-selector{max-width:none}}
+    @media(max-width:860px){.niche-hero{grid-template-columns:1fr}.niche-media{max-width:640px;margin:0 auto}.niche-selector{max-width:none}}
     @media(max-width:680px){.niche-hero{gap:22px}.niche-media{width:100%}.media-poster{min-height:0;border-radius:14px}.media-slide{grid-template-columns:1fr;min-height:0}.media-slide img{height:auto;aspect-ratio:16/9;min-height:0}.media-slide-content{padding:clamp(18px,5vw,24px)}.media-slide-content .eyebrow{font-size:.72rem}.media-carousel-controls{margin-top:14px}}
     @media(max-width:380px){.brand{font-size:1rem}.brand-mark{width:36px;height:36px}.play-button{font-size:16px;padding:10px 13px}}
   </style>
@@ -48,10 +51,10 @@
   <div class="page-shell">
     <div class="site-card">
       <header class="topbar">
-        <div class="brand" aria-label="Dugnic Travels and Expeditions">
+        <a class="brand" href="/en/" aria-label="Dugnic Travels and Expeditions home">
           <img class="brand-mark" src="/downloads/logo.jpeg" alt="Dugnic Travels logo" />
           <span class="brand-text">Dugnic Travels & Expeditions</span>
-        </div>
+        </a>
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="/en/">Home</a>
           <a href="/en/tours/">Tours</a>
@@ -94,27 +97,94 @@
         <div class="media-carousel" aria-label="Featured destination carousel">
           <div class="media-carousel-track">
             <article class="media-slide">
-              <img src="/assets/media/zanzibar-ocean.webp" alt="Zanzibar coast and ocean" />
+              <img src="/images/1920/11928473/Amboseli1.jpg" alt="Zebras at a watering hole in Amboseli, Kenya" fetchpriority="high" />
               <div class="media-slide-content">
-                <div class="eyebrow">Island calm</div>
-                <h3>Zanzibar</h3>
-                <p>Stone Town charm, turquoise water, and laid-back luxury along the coast.</p>
+                <div class="eyebrow">Wild in style</div>
+                <h3>Kenya</h3>
+                <p>Explore the Masai Mara, Laikipia conservancies, and the Kenyan coast.</p>
+                <a class="btn btn-primary" href="/en/kenya/">Explore Kenya</a>
               </div>
             </article>
             <article class="media-slide">
-              <img src="/images/1024%252C1920x1129%252B0%252B75/12152187/blue-wildebeests-7416195_1920.jpg" alt="Wildebeest crossing a river during the Great Migration in East Africa" />
+              <img src="/assets/media/tanzania-safari-poster.jpg" alt="Acacia tree on the Serengeti plains in Tanzania" loading="lazy" />
               <div class="media-slide-content">
                 <div class="eyebrow">Wild in style</div>
                 <h3>Tanzania</h3>
-                <p>Big skies, unforgettable game drives, and elegant safari camps in the wild.</p>
+                <p>Discover the Serengeti, Ngorongoro Crater, and unforgettable safari camps.</p>
+                <a class="btn btn-primary" href="/en/tanzania/">Explore Tanzania</a>
               </div>
             </article>
             <article class="media-slide">
-              <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1200&q=80" alt="Pont Alexandre III at dusk in Paris, France" />
+              <img src="/images/675/12057321/Nyungwe3.jpeg" alt="Forest canopy in Nyungwe National Park, Rwanda" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">Land of a thousand hills</div>
+                <h3>Rwanda</h3>
+                <p>Pair gorilla trekking with forest walks and welcoming lodge stays.</p>
+                <a class="btn btn-primary" href="/en/rwanda/">Explore Rwanda</a>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="/images/976/12057880/Bwindi2.webp" alt="Bwindi forest landscape in Uganda" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">Wild Uganda</div>
+                <h3>Uganda</h3>
+                <p>Meet mountain gorillas, track chimpanzees, and explore the Nile.</p>
+                <a class="btn btn-primary" href="/en/uganda/">Explore Uganda</a>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="/images/675/12057220/Zanzibar.jpeg" alt="Palm-lined beach on Zanzibar" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">Island calm</div>
+                <h3>Zanzibar</h3>
+                <p>Enjoy Stone Town, spice tours, dhow sunsets, and turquoise beaches.</p>
+                <a class="btn btn-primary" href="/en/zanzibar/">Explore Zanzibar</a>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="/images/675/12372340/johan3.jpg" alt="Gold Reef City in Johannesburg, South Africa" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">Coast, city & safari</div>
+                <h3>South Africa</h3>
+                <p>Combine Cape Town and the Winelands with a memorable safari.</p>
+                <a class="btn btn-primary" href="/en/south-africa/">Explore South Africa</a>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="/images/640/12056885/Versailles.jpg" alt="Palace of Versailles in France" loading="lazy" />
               <div class="media-slide-content">
                 <div class="eyebrow">Culture & heritage</div>
                 <h3>France</h3>
                 <p>Parisian landmarks, Provençal countryside, and timeless French food and culture.</p>
+                <a class="btn btn-primary" href="/en/france/">Explore France</a>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="/images/540/12057064/RhineValley.jpeg" alt="River and hills in Germany's Rhine Valley" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">City & castles</div>
+                <h3>Germany</h3>
+                <p>Discover historic cities, scenic river valleys, and fairytale castles.</p>
+                <a class="btn btn-primary" href="/en/germany/">Explore Germany</a>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="/assets/media/destinations/thailand-limestone-lagoon.webp" alt="Long-tail boat on a tropical limestone lagoon in Thailand" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">Temples & tropical shores</div>
+                <h3>Thailand</h3>
+                <p>Pair Bangkok's temples with northern culture and island beaches.</p>
+                <a class="btn btn-primary" href="/en/thailand/">Explore Thailand</a>
+              </div>
+            </article>
+            <article class="media-slide">
+              <img src="/assets/media/destinations/commons-london-home.webp" alt="London at night from the Millennium Bridge with a full moon" loading="lazy" />
+              <div class="media-slide-content">
+                <div class="eyebrow">A classic city escape</div>
+                <h3>London</h3>
+                <p>Enjoy historic landmarks, West End shows, and elevated dining.</p>
+                <p class="media-credit">Photo: <a href="https://commons.wikimedia.org/wiki/File:Night_London_Panorama_with_Full_Moon_-_Flickr_-_Dimitry_B.jpg" target="_blank" rel="noopener noreferrer">Night London Panorama with Full Moon</a> by Dimitry B. - <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a> (Wikimedia Commons).</p>
+                <a class="btn btn-primary" href="/en/london/">Explore London</a>
               </div>
             </article>
           </div>
@@ -250,6 +320,8 @@
       const previous = carousel.querySelector('#home-carousel-prev');
       const next = carousel.querySelector('#home-carousel-next');
       let activeIndex = 0;
+      const autoplayInterval = 5000;
+      let autoplayTimer;
 
       function showSlide(index) {
         activeIndex = (index + slides.length) % slides.length;
@@ -261,8 +333,38 @@
       }
 
       if (!slides.length || !previous || !next) return;
-      previous.addEventListener('click', function(){ showSlide(activeIndex - 1); });
-      next.addEventListener('click', function(){ showSlide(activeIndex + 1); });
+      function stopAutoplay() {
+        window.clearInterval(autoplayTimer);
+      }
+
+      function startAutoplay() {
+        stopAutoplay();
+        if (!document.hidden) {
+          autoplayTimer = window.setInterval(function(){
+            showSlide(activeIndex + 1);
+          }, autoplayInterval);
+        }
+      }
+
+      previous.addEventListener('click', function(){
+        showSlide(activeIndex - 1);
+        startAutoplay();
+      });
+      next.addEventListener('click', function(){
+        showSlide(activeIndex + 1);
+        startAutoplay();
+      });
+      carousel.addEventListener('mouseenter', stopAutoplay);
+      carousel.addEventListener('mouseleave', startAutoplay);
+      carousel.addEventListener('focusin', stopAutoplay);
+      carousel.addEventListener('focusout', function(event){
+        if (!carousel.contains(event.relatedTarget)) startAutoplay();
+      });
+      document.addEventListener('visibilitychange', function(){
+        if (document.hidden) stopAutoplay();
+        else startAutoplay();
+      });
+      startAutoplay();
       showSlide(0);
     })();
 
@@ -286,14 +388,11 @@
       const caption = document.getElementById('niche-caption');
       const cta = document.getElementById('niche-cta');
       const play = document.getElementById('niche-play');
-      let currentMedia = niches[0].media;
-
       niches.forEach(n=>{
         const opt = document.createElement('option'); opt.value = n.id; opt.textContent = n.title; select.appendChild(opt);
       });
 
       function renderMedia(media){
-        currentMedia = media;
         stage.innerHTML = '';
 
         if (media.type === 'video') {
@@ -329,9 +428,7 @@
         img.src = media.src;
         img.alt = 'Travel experience';
         stage.appendChild(img);
-        play.hidden = false;
-        play.textContent = '▶';
-        play.setAttribute('aria-label', 'Open image');
+        play.hidden = true;
       }
 
       function showNiche(id){
@@ -345,7 +442,8 @@
       }
 
       select.addEventListener('change', function(){ showNiche(this.value); });
-      showNiche(niches[0].id);
+      select.value = 'adventure';
+      showNiche(select.value);
 
       play.addEventListener('click', function(){
         const video = stage.querySelector('video');
@@ -356,9 +454,6 @@
           return;
         }
 
-        if (currentMedia && currentMedia.src) {
-          window.open(currentMedia.src, '_blank', 'noopener');
-        }
       });
     })();
   </script>

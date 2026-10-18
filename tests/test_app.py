@@ -160,9 +160,9 @@ class BlogAppTests(unittest.TestCase):
         self.assertEqual(posts[0]['media_filename'], posts[0]['media_items'][0]['filename'])
         for item in posts[0]['media_items']:
             with self.subTest(filename=item['filename']):
-                media_response = client.get(f"/media/{item['filename']}")
-                self.assertEqual(media_response.status_code, 200)
-                self.assertTrue(media_response.data)
+                with client.get(f"/media/{item['filename']}") as media_response:
+                    self.assertEqual(media_response.status_code, 200)
+                    self.assertTrue(media_response.data)
 
     def test_admin_can_delete_post_and_its_media(self):
         media_filename = 'test-upload.jpg'

@@ -36,6 +36,8 @@ SQLite is sufficient for this single-admin site and its blog; a separate MySQL d
 6. Keep the data directory in persistent storage during deployments and backups. Do not place it under a publicly served directory. Ensure the app process can create the SQLite database and upload directory.
 7. Enable HTTPS, then test `/`, `/admin/login`, `/admin/dashboard`, `/api/posts`, and the contact form. The blog dashboard is protected by the server-side login; the browser does not store an admin login flag or password.
 
+The admin dashboard supports multiple image and video uploads per blog story. Existing single-media posts remain available, and the app adds the gallery database column automatically on startup.
+
 ### Updating the site without losing blog content
 
 The website code and blog data are separate only when `DATABASE_PATH` and `UPLOAD_FOLDER` point to the private persistent data directory described above. Before changing or uploading site files:

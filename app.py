@@ -1,10 +1,10 @@
+import json
 import os
 import posixpath
 import secrets
 import sqlite3
 import smtplib
 import uuid
-import json
 from email.message import EmailMessage
 from functools import wraps
 from flask import Flask, abort, jsonify, redirect, render_template_string, request, send_from_directory, session, url_for

@@ -25,6 +25,7 @@ SQLite is sufficient for this single-admin site and its blog; a separate MySQL d
    - `ADMIN_PASSWORD`: the strong password chosen for the admin account. Do not put it in this repository.
    - `DATABASE_PATH`: an absolute path in the private data directory, such as `/home/CPANEL_USER/dugnic-data/blog.sqlite3`.
    - `UPLOAD_FOLDER`: an absolute path for persistent uploaded blog media, such as `/home/CPANEL_USER/dugnic-data/uploads`.
+   - `PUBLIC_BASE_URL`: the public site origin, such as `https://dugnictravelsandexpeditions.com` (defaults to this domain).
    - `SESSION_COOKIE_SECURE`: `true` after HTTPS is enabled.
 5. Set the cPanel startup file to `passenger_wsgi.py`, with this content:
 
@@ -37,6 +38,8 @@ SQLite is sufficient for this single-admin site and its blog; a separate MySQL d
 7. Enable HTTPS, then test `/`, `/admin/login`, `/admin/dashboard`, `/api/posts`, and the contact form. The blog dashboard is protected by the server-side login; the browser does not store an admin login flag or password.
 
 The admin dashboard supports multiple image and video uploads per blog story. Existing single-media posts remain available, and the app adds the gallery database column automatically on startup.
+
+Each published blog story has its own public `/blog/<id>/<slug>` page with Open Graph and Twitter preview metadata, plus WhatsApp share links. Set `PUBLIC_BASE_URL` to the site's canonical HTTPS origin so shared links and previews use the production domain.
 
 ### Updating the site without losing blog content
 

@@ -1,6 +1,7 @@
 import json
 import os
 import posixpath
+import re
 import secrets
 import sqlite3
 import smtplib
@@ -21,6 +22,10 @@ app.config['UPLOAD_FOLDER'] = os.environ.get(
     'UPLOAD_FOLDER',
     os.path.join(os.path.dirname(__file__), 'uploads'),
 )
+app.config['PUBLIC_BASE_URL'] = os.environ.get(
+    'PUBLIC_BASE_URL',
+    'https://dugnictravelsandexpeditions.com',
+).rstrip('/')
 app.config['ADMIN_USERNAME'] = os.environ.get('ADMIN_USERNAME')
 app.config['ADMIN_PASSWORD'] = os.environ.get('ADMIN_PASSWORD')
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -405,9 +410,97 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/blog/<int:post_id>/<slug>')
+@app.route('/blog/<int:post_id>')
+def blog_story(post_id, slug=None):
+    posts = get_posts()
+    post = next((item for item in posts if item['id'] == post_id), None)
+    if post is None:
+        abort(404)
+
+    canonical_slug = slugify(post['title'])
+    if slug != canonical_slug:
+        return redirect(url_for('blog_story', post_id=post_id, slug=canonical_slug), code=301)
+
+    story_path = url_for('blog_story', post_id=post_id, slug=canonical_slug)
+    story_url = f"{app.config['PUBLIC_BASE_URL']}{story_path}"
+    preview_media = next((item for item in post['media_items'] if item['type'] == 'image'), None)
+    image_url = (
+        f"{app.config['PUBLIC_BASE_URL']}{url_for('media', filename=preview_media['filename'])}"
+        if preview_media else
+        f"{app.config['PUBLIC_BASE_URL']}/assets/media/tanzania-safari-poster.jpg"
+    )
+    description = post['excerpt'] or post['content']
+    description = ' '.join(description.split())[:300]
+
+    return render_template_string('''
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>{{ post.title }} | Dugnic Travels and Expeditions</title>
+          <meta name="description" content="{{ description }}" />
+          <link rel="canonical" href="{{ story_url }}" />
+          <meta property="og:type" content="article" />
+          <meta property="og:site_name" content="Dugnic Travels and Expeditions" />
+          <meta property="og:title" content="{{ post.title }}" />
+          <meta property="og:description" content="{{ description }}" />
+          <meta property="og:url" content="{{ story_url }}" />
+          <meta property="og:image" content="{{ image_url }}" />
+          <meta property="og:image:alt" content="{{ post.title }}" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content="{{ post.title }}" />
+          <meta name="twitter:description" content="{{ description }}" />
+          <meta name="twitter:image" content="{{ image_url }}" />
+          <link rel="stylesheet" href="/css/dugnic-renovation.css" />
+        </head>
+        <body>
+          <main class="shared-story">
+            <a class="shared-story__back" href="/en/#blog-showcase">← All travel stories</a>
+            <article class="shared-story__article">
+              <div class="blog-card__meta">
+                <span class="pill">{{ post.category or 'Travel story' }}</span>
+                <span>{{ post.date or 'Recently published' }}</span>
+              </div>
+              <h1>{{ post.title }}</h1>
+              {% if post.location %}<p class="shared-story__location">{{ post.location }}</p>{% endif %}
+              {% if post.excerpt %}<p class="shared-story__excerpt">{{ post.excerpt }}</p>{% endif %}
+              {% if post.media_items %}
+                <div class="blog-media-gallery">
+                  {% for item in post.media_items %}
+                    <figure class="blog-media-gallery__item">
+                      {% if item.type == 'video' %}
+                        <video controls preload="metadata" playsinline src="{{ url_for('media', filename=item.filename) }}" aria-label="{{ post.title }} video"></video>
+                      {% else %}
+                        <img src="{{ url_for('media', filename=item.filename) }}" alt="{{ post.title }}" />
+                      {% endif %}
+                    </figure>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="shared-story__content">{{ post.content }}</div>
+              <a class="btn btn-primary" href="https://wa.me/?text={{ (post.title ~ ' ' ~ story_url)|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+            </article>
+          </main>
+        </body>
+        </html>
+    ''', post=post, description=description, story_url=story_url, image_url=image_url)
+
+
 @app.route('/api/posts')
 def api_posts():
-    return jsonify(get_posts())
+    posts = get_posts()
+    for post in posts:
+        story_path = url_for(
+            'blog_story',
+            post_id=post['id'],
+            slug=slugify(post['title']),
+        )
+        post['share_url'] = (
+            f"{app.config['PUBLIC_BASE_URL']}{story_path}"
+        )
+    return jsonify(posts)
 
 
 @app.route('/media/<path:filename>')
@@ -721,6 +814,10 @@ def create_post(
     post_id = cursor.lastrowid
     conn.close()
     return post_id
+
+
+def slugify(title):
+    return re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-') or 'story'
 
 
 def get_posts():

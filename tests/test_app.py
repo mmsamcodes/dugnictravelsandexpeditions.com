@@ -164,6 +164,49 @@ class BlogAppTests(unittest.TestCase):
                     self.assertEqual(media_response.status_code, 200)
                     self.assertTrue(media_response.data)
 
+    def test_blog_story_has_shareable_url_and_social_preview_metadata(self):
+        with app.app_context():
+            post_id = create_post(
+                title='Safari & sunset',
+                category='Safari',
+                location='Ruaha',
+                date='2026-07-08',
+                excerpt='A memorable safari <with friends>.',
+                content='A full story to share.',
+                media_filename='safari-preview.jpg',
+                media_type='image',
+                media_items=[{'filename': 'safari-preview.jpg', 'type': 'image'}],
+            )
+
+        client = app.test_client()
+        api_posts = client.get('/api/posts').get_json()
+        post = next(item for item in api_posts if item['id'] == post_id)
+        self.assertEqual(
+            post['share_url'],
+            f"{app.config['PUBLIC_BASE_URL']}/blog/{post_id}/safari-sunset",
+        )
+
+        response = client.get(f'/blog/{post_id}/safari-sunset')
+        html = response.get_data(as_text=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('<meta property="og:type" content="article"', html)
+        self.assertIn('<meta property="og:title" content="Safari &amp; sunset"', html)
+        self.assertIn(
+            '<meta property="og:description" content="A memorable safari &lt;with friends&gt;."',
+            html,
+        )
+        self.assertIn(
+            f'<meta property="og:url" content="{post["share_url"]}"',
+            html,
+        )
+        self.assertIn(
+            f'<meta property="og:image" content="{app.config["PUBLIC_BASE_URL"]}/media/safari-preview.jpg"',
+            html,
+        )
+        self.assertIn('Share on WhatsApp', html)
+        self.assertEqual(client.get(f'/blog/{post_id}/wrong-slug').status_code, 301)
+        self.assertEqual(client.get('/blog/99999/missing-story').status_code, 404)
+
     def test_admin_can_delete_post_and_its_media(self):
         media_filename = 'test-upload.jpg'
         video_filename = 'test-upload.mp4'

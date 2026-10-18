@@ -45,6 +45,8 @@
 
     postsGrid.innerHTML = posts.map((post) => {
       const media = renderMedia(post, true);
+      const shareUrl = post.share_url || new URL(`/blog/${encodeURIComponent(post.id)}`, window.location.origin).href;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${post.title || 'Travel story'} ${shareUrl}`)}`;
       return `
         <article class="blog-card" data-open-post="${escapeHtml(post.id)}">
           <div class="blog-card__media">${media || '<div class="blog-card__placeholder">Trip story</div>'}</div>
@@ -59,6 +61,7 @@
               <span>${escapeHtml(post.location || 'Destination shared')}</span>
               <span class="blog-card__read">Read story →</span>
             </div>
+            <a class="blog-share-link" href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
           </div>
         </article>
       `;
@@ -105,11 +108,12 @@
       return;
     }
 
+    if (target.closest('a, button, video')) {
+      return;
+    }
+
     const postCard = target.closest('[data-open-post]');
     if (postCard) {
-      if (target.closest('.blog-card__media video')) {
-        return;
-      }
       openPost(postCard.getAttribute('data-open-post'));
     }
   }
@@ -121,6 +125,8 @@
     }
 
     const media = renderMedia(post);
+    const shareUrl = post.share_url || new URL(`/blog/${encodeURIComponent(post.id)}`, window.location.origin).href;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${post.title || 'Travel story'} ${shareUrl}`)}`;
     modalContent.innerHTML = `
       <div class="post-modal">
         <div class="post-modal__meta">
@@ -132,6 +138,10 @@
         <p class="post-modal__location">${escapeHtml(post.location || 'Destination shared')}</p>
         <p>${escapeHtml(post.excerpt || '')}</p>
         <div class="post-modal__content">${escapeHtml(post.content || '')}</div>
+        <div class="post-modal__actions">
+          <a class="btn btn-primary" href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+          <a class="btn btn-secondary" href="${escapeHtml(shareUrl)}">Open shareable story page</a>
+        </div>
       </div>
     `;
 

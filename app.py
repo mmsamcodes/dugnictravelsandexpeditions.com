@@ -260,7 +260,9 @@ def admin_dashboard():
             .grid { display: grid; gap: 18px; grid-template-columns: 1.1fr 0.9fr; }
             .post-item { padding: 12px 0; border-top: 1px solid rgba(8,61,43,0.08); }
             .post-item:first-child { border-top: 0; padding-top: 0; }
-            .delete-form { display: inline-block; margin-top: 4px; }
+            .post-actions { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+            .post-actions form { display: inline-block; }
+            .edit-button { display: inline-block; padding: 10px 16px; border-radius: 999px; background: var(--forest); color: white; font-weight: 700; text-decoration: none; }
             .delete-button { background: #a12622; }
             .shell .pill { color: #083d2b; font-size: 0.85rem; }
             .upload-help { margin: -4px 0 0; color: #4b565e; font-size: 0.92rem; }
@@ -305,9 +307,12 @@ def admin_dashboard():
                     {% if post.media_items %}
                       <p>Gallery: {{ post.media_items|length }} item{% if post.media_items|length != 1 %}s{% endif %}</p>
                     {% endif %}
-                    <form class="delete-form" method="post" action="{{ url_for('delete_post_route', post_id=post.id) }}" onsubmit="return confirm('Delete this story permanently?');">
-                      <button class="delete-button" type="submit">Delete story</button>
-                    </form>
+                    <div class="post-actions">
+                      <a class="edit-button" href="{{ url_for('edit_post_route', post_id=post.id) }}">Edit story</a>
+                      <form method="post" action="{{ url_for('delete_post_route', post_id=post.id) }}" onsubmit="return confirm('Delete this story permanently?');">
+                        <button class="delete-button" type="submit">Delete story</button>
+                      </form>
+                    </div>
                   </div>
                 {% else %}
                   <p>No stories have been published yet.</p>
@@ -330,30 +335,7 @@ def create_post_route():
     excerpt = request.form.get('excerpt', '').strip()
     content = request.form.get('content', '').strip()
 
-    uploads = [
-        upload for upload in request.files.getlist('media')
-        if upload and upload.filename
-    ]
-    validated_uploads = []
-    for upload in uploads:
-        filename = secure_filename(upload.filename)
-        if not filename:
-            abort(400, description='A media file has an invalid filename.')
-        if upload.mimetype.startswith('image/'):
-            media_type = 'image'
-        elif upload.mimetype.startswith('video/'):
-            media_type = 'video'
-        else:
-            abort(400, description='Only image and video files can be added to a story.')
-        validated_uploads.append((upload, filename, media_type))
-
-    media_items = []
-    for upload, filename, media_type in validated_uploads:
-        unique_name = f"{uuid.uuid4().hex}_{filename}"
-        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-        upload.save(upload_path)
-        media_items.append({'filename': unique_name, 'type': media_type})
-
+    media_items = save_uploaded_media()
     first_media = media_items[0] if media_items else None
 
     create_post(
@@ -368,6 +350,106 @@ def create_post_route():
         media_items=media_items,
     )
     return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/admin/posts/<int:post_id>/edit', methods=['GET', 'POST'])
+@require_admin
+def edit_post_route(post_id):
+    post = next((item for item in get_posts() if item['id'] == post_id), None)
+    if post is None:
+        abort(404)
+
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        category = request.form.get('category', '').strip()
+        location = request.form.get('location', '').strip()
+        date = request.form.get('date', '').strip()
+        excerpt = request.form.get('excerpt', '').strip()
+        content = request.form.get('content', '').strip()
+        media_items = list(post['media_items'])
+        media_items.extend(save_uploaded_media())
+        first_media = media_items[0] if media_items else None
+
+        conn = get_db()
+        conn.execute(
+            '''
+            UPDATE posts
+            SET title = ?, category = ?, location = ?, date = ?, excerpt = ?,
+                content = ?, media_filename = ?, media_type = ?, media_items = ?
+            WHERE id = ?
+            ''',
+            (
+                title, category, location, date, excerpt, content,
+                first_media['filename'] if first_media else None,
+                first_media['type'] if first_media else None,
+                json.dumps(media_items) if media_items else None,
+                post_id,
+            ),
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template_string('''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Edit story · Dugnic Travels</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+          <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+          <style>
+            :root { --forest: #0f5a3e; --forest-deep: #083d2b; --gold: #c7922b; --cream: #f8f3e7; --ink: #172126; --muted: #53606a; }
+            * { box-sizing: border-box; }
+            body { margin: 0; font-family: "Roboto", Arial, sans-serif; background: linear-gradient(135deg, var(--cream), #fffdf8); color: var(--ink); }
+            .shell { max-width: 860px; margin: 0 auto; padding: 24px; }
+            .card { background: white; border: 1px solid rgba(8,61,43,0.1); border-radius: 24px; padding: 24px; box-shadow: 0 20px 48px rgba(8,61,43,0.1); }
+            h1, h2 { font-family: "Gilda Display", Georgia, serif; color: var(--forest-deep); margin: 0 0 10px; }
+            p { color: var(--muted); }
+            form { display: grid; gap: 12px; }
+            input, textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #d8d0c0; font: inherit; color: var(--ink); background: white; }
+            textarea { min-height: 110px; resize: vertical; }
+            button { border: 0; cursor: pointer; padding: 12px 16px; border-radius: 999px; font-weight: 700; background: var(--gold); color: white; }
+            .back-link, .media-link { color: var(--forest); font-weight: 700; }
+            .current-media { margin: 20px 0; }
+            .current-media li { margin: 6px 0; }
+            .upload-help { margin: -4px 0 0; }
+          </style>
+        </head>
+        <body>
+          <main class="shell">
+            <section class="card">
+              <a class="back-link" href="{{ url_for('admin_dashboard') }}">Back to dashboard</a>
+              <h1>Edit story</h1>
+              <form method="post" enctype="multipart/form-data">
+                <input name="title" placeholder="Story title" value="{{ post.title }}" required />
+                <input name="category" placeholder="Category" value="{{ post.category }}" required />
+                <input name="location" placeholder="Location" value="{{ post.location or '' }}" />
+                <input name="date" type="date" value="{{ post.date or '' }}" />
+                <textarea name="excerpt" placeholder="Short intro">{{ post.excerpt or '' }}</textarea>
+                <textarea name="content" placeholder="Full story" required>{{ post.content }}</textarea>
+                {% if post.media_items %}
+                  <div class="current-media">
+                    <h2>Current story media</h2>
+                    <ul>
+                      {% for item in post.media_items %}
+                        <li><a class="media-link" href="{{ url_for('media', filename=item.filename) }}" target="_blank" rel="noopener">{{ item.filename }}</a> ({{ item.type }})</li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% endif %}
+                <label for="post-media">Add photos or videos</label>
+                <input id="post-media" name="media" type="file" accept="image/*,video/*" multiple />
+                <p class="upload-help">Existing media will be kept. New files will be added to the story gallery.</p>
+                <button type="submit">Save changes</button>
+              </form>
+            </section>
+          </main>
+        </body>
+        </html>
+    ''', post=post)
 
 
 @app.route('/admin/posts/<int:post_id>/delete', methods=['POST'])
@@ -402,6 +484,33 @@ def delete_post_route(post_id):
                 os.remove(media_path)
 
     return redirect(url_for('admin_dashboard'))
+
+
+def save_uploaded_media():
+    uploads = [
+        upload for upload in request.files.getlist('media')
+        if upload and upload.filename
+    ]
+    validated_uploads = []
+    for upload in uploads:
+        filename = secure_filename(upload.filename)
+        if not filename:
+            abort(400, description='A media file has an invalid filename.')
+        if upload.mimetype.startswith('image/'):
+            media_type = 'image'
+        elif upload.mimetype.startswith('video/'):
+            media_type = 'video'
+        else:
+            abort(400, description='Only image and video files can be added to a story.')
+        validated_uploads.append((upload, filename, media_type))
+
+    media_items = []
+    for upload, filename, media_type in validated_uploads:
+        unique_name = f"{uuid.uuid4().hex}_{filename}"
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+        upload.save(upload_path)
+        media_items.append({'filename': unique_name, 'type': media_type})
+    return media_items
 
 
 @app.route('/admin/logout', methods=['POST'])

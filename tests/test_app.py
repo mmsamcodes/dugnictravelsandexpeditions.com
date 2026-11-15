@@ -164,6 +164,78 @@ class BlogAppTests(unittest.TestCase):
                     self.assertEqual(media_response.status_code, 200)
                     self.assertTrue(media_response.data)
 
+    def test_admin_can_edit_story_and_keep_existing_media(self):
+        existing_media = 'existing-story.jpg'
+        existing_media_path = os.path.join(app.config['UPLOAD_FOLDER'], existing_media)
+        with open(existing_media_path, 'wb') as media_file:
+            media_file.write(b'existing image')
+
+        with app.app_context():
+            post_id = create_post(
+                title='Original story',
+                category='Safari',
+                location='Ruaha',
+                date='2026-07-08',
+                excerpt='Original intro',
+                content='Original story body',
+                media_filename=existing_media,
+                media_type='image',
+                media_items=[{'filename': existing_media, 'type': 'image'}],
+            )
+
+        client = app.test_client()
+        edit_url = f'/admin/posts/{post_id}/edit'
+        self.assertEqual(client.get(edit_url).status_code, 302)
+        self.assertEqual(client.post(edit_url).status_code, 302)
+
+        login_response = client.post('/admin/login', data={
+            'username': 'test-admin',
+            'password': app.config['ADMIN_PASSWORD'],
+        })
+        self.assertEqual(login_response.status_code, 302)
+
+        edit_response = client.get(edit_url)
+        edit_html = edit_response.get_data(as_text=True)
+        self.assertEqual(edit_response.status_code, 200)
+        self.assertIn('value="Original story"', edit_html)
+        self.assertIn('name="content" placeholder="Full story" required>Original story body', edit_html)
+        self.assertIn('existing-story.jpg', edit_html)
+        self.assertIn('Save changes', edit_html)
+
+        dashboard_html = client.get('/admin/dashboard').get_data(as_text=True)
+        self.assertIn(f'href="{edit_url}"', dashboard_html)
+        self.assertIn('Edit story', dashboard_html)
+
+        update_response = client.post(edit_url, data={
+            'title': 'Updated story',
+            'category': 'Culture',
+            'location': 'Zanzibar',
+            'date': '2026-08-09',
+            'excerpt': 'Updated intro',
+            'content': 'Updated story body',
+            'media': (BytesIO(b'new video'), 'new-story.mp4', 'video/mp4'),
+        }, content_type='multipart/form-data')
+        self.assertEqual(update_response.status_code, 302)
+
+        updated_post = client.get('/api/posts').get_json()[0]
+        self.assertEqual(updated_post['title'], 'Updated story')
+        self.assertEqual(updated_post['category'], 'Culture')
+        self.assertEqual(updated_post['location'], 'Zanzibar')
+        self.assertEqual(updated_post['date'], '2026-08-09')
+        self.assertEqual(updated_post['excerpt'], 'Updated intro')
+        self.assertEqual(updated_post['content'], 'Updated story body')
+        self.assertEqual(
+            [item['type'] for item in updated_post['media_items']],
+            ['image', 'video'],
+        )
+        self.assertEqual(updated_post['media_items'][0]['filename'], existing_media)
+        self.assertTrue(os.path.exists(existing_media_path))
+        new_media = updated_post['media_items'][1]
+        self.assertEqual(new_media['type'], 'video')
+        with client.get(f"/media/{new_media['filename']}") as media_response:
+            self.assertEqual(media_response.status_code, 200)
+        self.assertEqual(client.get('/admin/posts/99999/edit').status_code, 404)
+
     def test_blog_story_has_shareable_url_and_social_preview_metadata(self):
         with app.app_context():
             post_id = create_post(

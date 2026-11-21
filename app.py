@@ -589,6 +589,9 @@ def blog_story(post_id, slug=None):
                 </div>
               {% endif %}
               <div class="shared-story__content">{{ post.content }}</div>
+              {% if session.get('admin_user') %}
+                <a class="btn btn-secondary" href="{{ url_for('edit_post_route', post_id=post.id) }}">Edit story</a>
+              {% endif %}
               <a class="btn btn-primary" href="https://wa.me/?text={{ (post.title ~ ' ' ~ story_url)|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
             </article>
           </main>
@@ -609,6 +612,11 @@ def api_posts():
         post['share_url'] = (
             f"{app.config['PUBLIC_BASE_URL']}{story_path}"
         )
+        if session.get('admin_user'):
+            post['edit_url'] = url_for(
+                'edit_post_route',
+                post_id=post['id'],
+            )
     return jsonify(posts)
 
 

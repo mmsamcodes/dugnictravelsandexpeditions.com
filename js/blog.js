@@ -47,6 +47,9 @@
       const media = renderMedia(post, true);
       const shareUrl = post.share_url || new URL(`/blog/${encodeURIComponent(post.id)}`, window.location.origin).href;
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${post.title || 'Travel story'} ${shareUrl}`)}`;
+      const editLink = post.edit_url
+        ? `<a class="blog-edit-link" href="${escapeHtml(post.edit_url)}">Edit story</a>`
+        : '';
       return `
         <article class="blog-card" data-open-post="${escapeHtml(post.id)}">
           <div class="blog-card__media">${media || '<div class="blog-card__placeholder">Trip story</div>'}</div>
@@ -61,6 +64,7 @@
               <span>${escapeHtml(post.location || 'Destination shared')}</span>
               <span class="blog-card__read">Read story →</span>
             </div>
+            ${editLink}
             <a class="blog-share-link" href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
           </div>
         </article>
@@ -127,6 +131,9 @@
     const media = renderMedia(post);
     const shareUrl = post.share_url || new URL(`/blog/${encodeURIComponent(post.id)}`, window.location.origin).href;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${post.title || 'Travel story'} ${shareUrl}`)}`;
+    const editLink = post.edit_url
+      ? `<a class="btn btn-secondary" href="${escapeHtml(post.edit_url)}">Edit story</a>`
+      : '';
     modalContent.innerHTML = `
       <div class="post-modal">
         <div class="post-modal__meta">
@@ -141,6 +148,7 @@
         <div class="post-modal__actions">
           <a class="btn btn-primary" href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
           <a class="btn btn-secondary" href="${escapeHtml(shareUrl)}">Open shareable story page</a>
+          ${editLink}
         </div>
       </div>
     `;

@@ -187,12 +187,22 @@ class BlogAppTests(unittest.TestCase):
         edit_url = f'/admin/posts/{post_id}/edit'
         self.assertEqual(client.get(edit_url).status_code, 302)
         self.assertEqual(client.post(edit_url).status_code, 302)
+        public_post = next(
+            item for item in client.get('/api/posts').get_json()
+            if item['id'] == post_id
+        )
+        self.assertNotIn('edit_url', public_post)
 
         login_response = client.post('/admin/login', data={
             'username': 'test-admin',
             'password': app.config['ADMIN_PASSWORD'],
         })
         self.assertEqual(login_response.status_code, 302)
+        admin_post = next(
+            item for item in client.get('/api/posts').get_json()
+            if item['id'] == post_id
+        )
+        self.assertEqual(admin_post['edit_url'], edit_url)
 
         edit_response = client.get(edit_url)
         edit_html = edit_response.get_data(as_text=True)
@@ -201,6 +211,9 @@ class BlogAppTests(unittest.TestCase):
         self.assertIn('name="content" placeholder="Full story" required>Original story body', edit_html)
         self.assertIn('existing-story.jpg', edit_html)
         self.assertIn('Save changes', edit_html)
+
+        story_response = client.get(f'/blog/{post_id}/original-story')
+        self.assertIn(edit_url, story_response.get_data(as_text=True))
 
         dashboard_html = client.get('/admin/dashboard').get_data(as_text=True)
         self.assertIn(f'href="{edit_url}"', dashboard_html)

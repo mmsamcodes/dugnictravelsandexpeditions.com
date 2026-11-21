@@ -279,9 +279,9 @@ class BlogAppTests(unittest.TestCase):
         self.assertEqual(client.get(f'/blog/{post_id}/wrong-slug').status_code, 301)
         self.assertEqual(client.get('/blog/99999/missing-story').status_code, 404)
 
-    def test_site_footers_include_official_social_links(self):
+    def test_public_pages_include_official_social_links(self):
         client = app.test_client()
-        for path in ('/', '/contact', '/en/tours/', '/en/experiences/'):
+        for path in ('/', '/contact', '/en/tours/', '/en/experiences/', '/en/kenya/'):
             with self.subTest(path=path):
                 with client.get(path) as response:
                     html = response.get_data(as_text=True)

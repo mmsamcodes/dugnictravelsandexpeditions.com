@@ -889,7 +889,7 @@ FOOTER_SOCIAL_LINKS = '''
 
 
 @app.after_request
-def add_whatsapp_widget(response):
+def add_site_widgets(response):
     if response.mimetype != 'text/html':
         return response
 
@@ -901,10 +901,18 @@ def add_whatsapp_widget(response):
             stylesheet = '<link rel="stylesheet" href="/css/dugnic-renovation.css" />'
             html = html[:head_end] + stylesheet + html[head_end:]
 
-    if 'class="footer-social-links"' not in html:
+    if (
+        not request.path.startswith('/admin')
+        and 'class="footer-social-links"' not in html
+    ):
         footer_end = html.lower().rfind('</footer>')
         if footer_end >= 0:
             html = html[:footer_end] + FOOTER_SOCIAL_LINKS + html[footer_end:]
+        else:
+            body_end = html.lower().rfind('</body>')
+            if body_end >= 0:
+                social_footer = f'<footer class="site-footer">{FOOTER_SOCIAL_LINKS}</footer>'
+                html = html[:body_end] + social_footer + html[body_end:]
 
     if request.endpoint != 'admin_dashboard' and 'class="whatsapp-widget"' not in html:
         body_end = html.lower().rfind('</body>')

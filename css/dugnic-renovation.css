@@ -477,6 +477,40 @@ footer {
   color: var(--muted);
 }
 
+.footer-social-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.footer-social-link {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(15, 90, 62, 0.08);
+  color: var(--forest);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.footer-social-link:hover {
+  background: var(--forest);
+  color: #fff;
+}
+
+.footer-social-link:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.footer-social-link svg {
+  width: 18px;
+  height: 18px;
+}
+
 .blog-section {
   padding-top: 8px;
 }

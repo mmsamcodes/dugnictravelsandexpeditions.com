@@ -870,6 +870,23 @@ WHATSAPP_WIDGET = '''
 </a>
 '''
 
+FOOTER_SOCIAL_LINKS = '''
+<nav class="footer-social-links" aria-label="Follow Dugnic Travels and Expeditions">
+  <a class="footer-social-link" href="https://www.instagram.com/dugnic_travels/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor"/>
+    </svg>
+  </a>
+  <a class="footer-social-link" href="https://www.facebook.com/Dugnictravels/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="currentColor" d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5h1.7V3.9c-.3 0-1.3-.1-2.4-.1-2.4 0-4.1 1.5-4.1 4.2V10H7.5v3h2.8v8h3.2Z"/>
+    </svg>
+  </a>
+</nav>
+'''
+
 
 @app.after_request
 def add_whatsapp_widget(response):
@@ -883,6 +900,11 @@ def add_whatsapp_widget(response):
         if head_end >= 0:
             stylesheet = '<link rel="stylesheet" href="/css/dugnic-renovation.css" />'
             html = html[:head_end] + stylesheet + html[head_end:]
+
+    if 'class="footer-social-links"' not in html:
+        footer_end = html.lower().rfind('</footer>')
+        if footer_end >= 0:
+            html = html[:footer_end] + FOOTER_SOCIAL_LINKS + html[footer_end:]
 
     if request.endpoint != 'admin_dashboard' and 'class="whatsapp-widget"' not in html:
         body_end = html.lower().rfind('</body>')
